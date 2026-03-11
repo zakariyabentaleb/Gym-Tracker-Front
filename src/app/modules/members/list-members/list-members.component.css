@@ -1,0 +1,70 @@
+/* ── List Members ──────────────── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.search-bar {
+  margin-bottom: 16px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.search-bar .search-field {
+  max-width: 400px;
+}
+
+.table-card {
+  padding: 0;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.members-table {
+  width: 100%;
+}
+
+.action-btns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.btn-sm {
+  padding: 6px;
+  min-width: 36px;
+  border-radius: 8px;
+}
+
+.btn-sm mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.btn-danger-text {
+  color: var(--c-danger) !important;
+}
+
+.btn-danger-text:hover {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 24px;
+  color: var(--c-text-dim);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.empty-state .empty-icon {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+  animation: float 3s ease-in-out infinite;
+}
