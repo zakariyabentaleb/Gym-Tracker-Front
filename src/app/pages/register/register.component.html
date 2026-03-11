@@ -1,0 +1,105 @@
+<div class="auth-page">
+  <!-- background effects -->
+  <div class="bg-canvas"></div>
+  <div class="bg-grid"></div>
+
+  <div class="auth-card">
+    <div class="card-glow"></div>
+
+    <!-- close / back to home -->
+    <a routerLink="/" class="card-close">✕</a>
+
+    <div class="card-header">
+      <div class="card-icon">🚀</div>
+      <h2 class="card-title">Créer un compte</h2>
+      <p class="card-sub">Rejoignez la communauté FitZone</p>
+    </div>
+
+    <div class="card-body">
+      @if (error) {
+        <div class="form-error">{{ error }}</div>
+      }
+      @if (success) {
+        <div class="form-success">{{ success }}</div>
+      }
+
+      <form (ngSubmit)="submit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Prénom</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">👤</span>
+              <input class="form-input" name="firstName" [(ngModel)]="firstName"
+                     placeholder="Prénom" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom</label>
+            <div class="input-icon-wrap">
+              <span class="input-icon">👤</span>
+              <input class="form-input" name="lastName" [(ngModel)]="lastName"
+                     placeholder="Nom" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nom d'utilisateur</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">✉️</span>
+            <input class="form-input" name="username" [(ngModel)]="username"
+                   placeholder="votre nom d'utilisateur" autocomplete="username" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Téléphone</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">📱</span>
+            <input class="form-input" name="phone" [(ngModel)]="phone"
+                   placeholder="+212 6XX XXX XXX" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" name="password" [(ngModel)]="password"
+                   placeholder="Min. 8 caractères" autocomplete="new-password" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Plan</label>
+          <select class="form-input" name="plan" [(ngModel)]="plan">
+            <option value="starter">Starter – 199 DH/mois</option>
+            <option value="pro">Pro – 349 DH/mois</option>
+            <option value="elite">Elite – 549 DH/mois</option>
+          </select>
+        </div>
+
+        <label class="form-check">
+          <input type="checkbox" [(ngModel)]="acceptTerms" name="acceptTerms" />
+          J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>
+        </label>
+
+        <button class="btn-submit" type="submit"
+                [disabled]="loading || !firstName || !lastName || !username || !password || !acceptTerms">
+          {{ loading ? 'Création...' : 'Créer mon compte' }}
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>ou continuer avec</span>
+      </div>
+
+      <button class="btn-social">🔵 Google</button>
+      <button class="btn-social">🟢 Facebook</button>
+    </div>
+
+    <div class="card-footer">
+      Déjà membre ? <a routerLink="/login">Se connecter</a>
+    </div>
+  </div>
+</div>
