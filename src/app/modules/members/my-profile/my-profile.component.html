@@ -1,0 +1,247 @@
+<section class="profile-page">
+  <div class="profile-bg-grid"></div>
+
+  <!-- Toast messages -->
+  @if (saved) {
+    <div class="profile-toast toast-ok">
+      <span>✅</span> Profil mis à jour avec succès !
+      <button class="toast-x" (click)="saved = false">✕</button>
+    </div>
+  }
+  @if (error) {
+    <div class="profile-toast toast-err">
+      <span>⚠️</span> {{ error }}
+      <button class="toast-x" (click)="error = ''">✕</button>
+    </div>
+  }
+
+  @if (member) {
+    <!-- Profile Header Card -->
+    <div class="profile-hero">
+      <div class="hero-glow"></div>
+      <div class="hero-inner">
+        <div class="avatar-section">
+          <div class="avatar">
+            <span class="avatar-text">{{ getInitials() }}</span>
+          </div>
+          <div class="status-dot" [class.active]="member.active"></div>
+        </div>
+        <div class="hero-info">
+          <h1 class="hero-name">{{ getFullName() }}</h1>
+          <div class="hero-meta">
+            <span class="meta-item">
+              <span class="meta-icon">📧</span>
+              Membre #{{ member.id }}
+            </span>
+            @if (member.phone) {
+              <span class="meta-item">
+                <span class="meta-icon">📱</span>
+                {{ member.phone }}
+              </span>
+            }
+            @if (member.birthDate) {
+              <span class="meta-item">
+                <span class="meta-icon">🎂</span>
+                {{ formatDate(member.birthDate) }}
+              </span>
+            }
+          </div>
+          <div class="hero-badges">
+            <span class="badge" [class.badge-active]="member.active" [class.badge-inactive]="!member.active">
+              {{ member.active ? '✅ Actif' : '⏸️ Inactif' }}
+            </span>
+            @if (activeSub) {
+              <span class="badge badge-sub">
+                👑 {{ activePlan?.name || 'Abonné' }}
+              </span>
+            }
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-edit" (click)="toggleEdit()">
+            ✏️ Modifier
+          </button>
+          <button class="btn-password" (click)="openPasswordModal()">
+            🔒 Mot de passe
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="profile-grid">
+      <!-- Left: Info Cards -->
+      <div class="profile-left">
+        <!-- Personal Info Card -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <span class="info-card-icon">👤</span>
+            <h3>Informations personnelles</h3>
+          </div>
+          <div class="info-rows">
+            <div class="info-row">
+              <span class="info-label">Prénom</span>
+              <span class="info-value">{{ member.firstName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Nom</span>
+              <span class="info-value">{{ member.lastName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Téléphone</span>
+              <span class="info-value">{{ member.phone || '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Date de naissance</span>
+              <span class="info-value">{{ formatDate(member.birthDate) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Statut</span>
+              <span class="info-value">
+                <span class="status-pill" [class.pill-active]="member.active" [class.pill-inactive]="!member.active">
+                  {{ member.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">🆔</div>
+            <div class="stat-val">#{{ member.id }}</div>
+            <div class="stat-lbl">ID Membre</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-val">{{ getDaysLeft() }}</div>
+            <div class="stat-lbl">Jours restants</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💳</div>
+            <div class="stat-val">{{ activePlan ? formatPrice(activePlan.priceCents) : '—' }}</div>
+            <div class="stat-lbl">MAD / plan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Subscription + Edit Form -->
+      <div class="profile-right">
+        <!-- Subscription Card -->
+        <div class="sub-card" [class.sub-active]="activeSub" [class.sub-none]="!activeSub">
+          <div class="sub-card-header">
+            <span class="sub-card-icon">{{ activeSub ? '👑' : '📋' }}</span>
+            <h3>Mon abonnement</h3>
+          </div>
+          @if (activeSub && activePlan) {
+            <div class="sub-plan-name">{{ activePlan.name }}</div>
+            <div class="sub-dates">
+              <div class="sub-date-item">
+                <span class="sub-date-label">Début</span>
+                <span class="sub-date-val">{{ formatDate(activeSub.startDate) }}</span>
+              </div>
+              <div class="sub-date-sep">→</div>
+              <div class="sub-date-item">
+                <span class="sub-date-label">Fin</span>
+                <span class="sub-date-val">{{ formatDate(activeSub.endDate) }}</span>
+              </div>
+            </div>
+            <div class="sub-progress-wrap">
+              <div class="sub-progress-bar">
+                <div class="sub-progress-fill" [style.width.%]="getSubProgress()"></div>
+              </div>
+              <div class="sub-progress-info">
+                <span>{{ getSubProgress() }}% écoulé</span>
+                <span>{{ getDaysLeft() }} jours restants</span>
+              </div>
+            </div>
+            <a class="sub-link" routerLink="/mon-abonnement">
+              Voir les détails →
+            </a>
+          } @else {
+            <div class="sub-empty">
+              <div class="sub-empty-icon">📋</div>
+              <p>Aucun abonnement actif</p>
+              <a class="sub-empty-btn" routerLink="/plans">Découvrir nos plans →</a>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  } @else if (!error) {
+    <div class="profile-loading">
+      <div class="loading-spinner"></div>
+      <p>Chargement de votre profil…</p>
+    </div>
+  }
+
+  <!-- Edit Modal -->
+  @if (editing && member) {
+    <div class="modal-backdrop" (click)="toggleEdit()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>✏️ Modifier mon profil</h2>
+        <button class="modal-close" (click)="toggleEdit()">✕</button>
+      </div>
+      <div class="modal-body">
+        <app-member-form
+          [initial]="member"
+          [editMode]="true"
+          (submitForm)="onUpdate($event)">
+        </app-member-form>
+      </div>
+    </div>
+  }
+
+  <!-- Password Modal -->
+  @if (showPasswordModal) {
+    <div class="modal-backdrop" (click)="closePasswordModal()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>🔒 Changer le mot de passe</h2>
+        <button class="modal-close" (click)="closePasswordModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        @if (passwordSuccess) {
+          <div class="pwd-success">
+            <div class="pwd-success-icon">✅</div>
+            <p>Mot de passe modifié avec succès !</p>
+          </div>
+        } @else {
+          <form class="pwd-form" (ngSubmit)="submitPassword()">
+            @if (passwordError) {
+              <div class="pwd-error">{{ passwordError }}</div>
+            }
+            <div class="pwd-field">
+              <label class="pwd-label">🔑 Mot de passe actuel</label>
+              <div class="pwd-input-wrap">
+                <input type="password" [(ngModel)]="currentPassword" name="currentPassword" placeholder="Votre mot de passe actuel" class="pwd-input" />
+              </div>
+            </div>
+            <div class="pwd-field">
+              <label class="pwd-label">🔐 Nouveau mot de passe</label>
+              <div class="pwd-input-wrap">
+                <input type="password" [(ngModel)]="newPassword" name="newPassword" placeholder="Minimum 4 caractères" class="pwd-input" />
+              </div>
+            </div>
+            <div class="pwd-field">
+              <label class="pwd-label">🔁 Confirmer le mot de passe</label>
+              <div class="pwd-input-wrap">
+                <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Répétez le nouveau mot de passe" class="pwd-input" />
+              </div>
+            </div>
+            <button type="submit" class="pwd-submit" [disabled]="passwordLoading">
+              @if (passwordLoading) {
+                <span class="pwd-spinner"></span>
+              } @else {
+                💾 Enregistrer
+              }
+            </button>
+          </form>
+        }
+      </div>
+    </div>
+  }
+</section>
