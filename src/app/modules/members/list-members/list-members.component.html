@@ -1,0 +1,91 @@
+<div class="page-shell">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">👥 Members</h1>
+      <p class="page-subtitle">Manage gym members</p>
+    </div>
+    <a class="btn btn-primary" routerLink="create">➕ New member</a>
+  </div>
+
+  <div class="search-bar">
+    <mat-form-field appearance="fill" class="search-field">
+      <mat-label>Search members…</mat-label>
+      <input matInput [(ngModel)]="search" (keyup.enter)="onSearch()">
+      <button matSuffix mat-icon-button (click)="onSearch()" matTooltip="Search">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="table-card card">
+    <table mat-table [dataSource]="members" class="members-table">
+
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>#</th>
+        <td mat-cell *matCellDef="let m">{{ m.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="firstName">
+        <th mat-header-cell *matHeaderCellDef>First Name</th>
+        <td mat-cell *matCellDef="let m">{{ m.firstName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="lastName">
+        <th mat-header-cell *matHeaderCellDef>Last Name</th>
+        <td mat-cell *matCellDef="let m">{{ m.lastName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="phone">
+        <th mat-header-cell *matHeaderCellDef>Phone</th>
+        <td mat-cell *matCellDef="let m">{{ m.phone || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="active">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let m">
+          <span class="pill" [class.pill-ok]="m.active" [class.pill-warn]="!m.active">
+            {{ m.active ? 'Active' : 'Inactive' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let m">
+          <div class="action-btns">
+            <a [routerLink]="[m.id]" class="btn btn-ghost btn-sm" matTooltip="View details">
+              <mat-icon>visibility</mat-icon>
+            </a>
+            <a [routerLink]="[m.id, 'edit']" class="btn btn-ghost btn-sm" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </a>
+            @if (auth.hasRole('ROLE_ADMIN')) {
+              <button class="btn btn-ghost btn-sm btn-danger-text" (click)="onDelete(m.id)" matTooltip="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (members.length === 0) {
+      <div class="empty-state">
+        <span class="empty-icon">📋</span>
+        <p>No members found</p>
+      </div>
+    }
+
+    <mat-paginator
+      [length]="total"
+      [pageSize]="size"
+      [pageIndex]="page"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPage($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  </div>
+</div>
