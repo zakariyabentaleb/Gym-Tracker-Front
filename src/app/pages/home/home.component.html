@@ -1,0 +1,350 @@
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<!-- ═══════════════════════════ NAVBAR ═══════════════════════════ -->
+<nav id="navbar">
+  <a class="nav-logo" routerLink="/">
+    <div class="nav-logo-icon">🏋️</div>
+    <div class="nav-logo-text">Fit<span>Zone</span> Pro</div>
+  </a>
+
+  <div class="nav-links">
+    <a class="nav-link" routerLink="/programmes">Programmes</a>
+    <a class="nav-link" routerLink="/plans">Tarifs</a>
+    <a class="nav-link" (click)="scrollTo('features')">À propos</a>
+    <a class="nav-link" (click)="scrollTo('footer')">Contact</a>
+    @if (auth.hasRole('ROLE_MEMBER')) {
+      <a class="nav-link" routerLink="/mes-inscriptions">📋 Mes Inscriptions</a>
+    }
+    @if (auth.hasRole('ROLE_ADMIN')) {
+      <a class="nav-link" routerLink="/admin">Admin</a>
+    }
+  </div>
+
+  <div class="nav-actions">
+    @if (!auth.isLoggedIn()) {
+      <a class="btn btn-outline" routerLink="/login">Connexion</a>
+      <a class="btn btn-primary" routerLink="/register">S'inscrire</a>
+    } @else {
+      <span class="user-role-badge">{{ auth.getUserRoles()[0] || 'User' }}</span>
+      <a class="btn btn-outline" routerLink="/members/me">Mon profil</a>
+      <button class="btn btn-outline" (click)="logout()">Logout</button>
+    }
+  </div>
+</nav>
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge">
+        <div class="badge-dot"></div>
+        Salle N°1 à Kénitra
+      </div>
+
+      <h1 class="hero-title">
+        DÉPASSE<br>
+        TES<br>
+        <span class="line2">LIMITES</span>
+      </h1>
+
+      <p class="hero-desc">
+        Rejoins la communauté FitZone Pro — coaching expert, équipements premium et programmes personnalisés pour transformer ton corps et ta vie.
+      </p>
+
+      <div class="hero-ctas">
+        @if (!auth.isLoggedIn()) {
+          <a class="btn-hero btn-hero-primary" routerLink="/register">
+            Commencer gratuitement →
+          </a>
+          <a class="btn-hero btn-hero-ghost" routerLink="/plans">
+            Voir les tarifs
+          </a>
+        } @else {
+          <a class="btn-hero btn-hero-primary" routerLink="/programmes">Explorer les programmes</a>
+          <a class="btn-hero btn-hero-ghost" routerLink="/mes-inscriptions">
+            Mes inscriptions
+          </a>
+        }
+      </div>
+
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <div class="trust-av" style="background:linear-gradient(135deg,#f97316,#ea580c)">A</div>
+          <div class="trust-av" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">S</div>
+          <div class="trust-av" style="background:linear-gradient(135deg,#22c55e,#15803d)">Y</div>
+          <div class="trust-av" style="background:linear-gradient(135deg,#a855f7,#7c3aed)">N</div>
+          <div class="trust-av trust-av-more">+338</div>
+        </div>
+        <div class="trust-text">
+          <div class="trust-stars">★★★★★</div>
+          <span>Rejoint par <strong>342+ membres</strong> satisfaits</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-visual-card">
+        <div class="visual-glow"></div>
+        <div class="visual-content">
+          <div class="visual-label">🔥 Résultats vérifiés</div>
+          <div class="visual-stats-grid">
+            <div class="vs-item">
+              <div class="vs-val">97%</div>
+              <div class="vs-lbl">Satisfaction</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-val">-8kg</div>
+              <div class="vs-lbl">Moy. en 3 mois</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-val">+35%</div>
+              <div class="vs-lbl">Force gagnée</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-val">24/7</div>
+              <div class="vs-lbl">Support coach</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card float-card-1">
+        <div class="float-inner">
+          <div class="float-icon">⚡</div>
+          <div class="float-text">
+            <div>Prochain cours</div>
+            <div>CrossFit · 18h00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card float-card-2">
+        <div class="float-inner">
+          <div class="float-icon">🏆</div>
+          <div class="float-text">
+            <div>+24% force</div>
+            <div>Ce mois-ci</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ STATS BANNER ═══════════════════════════ -->
+<section class="stats-banner reveal">
+  <div class="stats-inner">
+    <div class="stat-block">
+      <div class="stat-num">342+</div>
+      <div class="stat-label">Membres actifs</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-block">
+      <div class="stat-num">18</div>
+      <div class="stat-label">Coachs certifiés</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-block">
+      <div class="stat-num">190+</div>
+      <div class="stat-label">Équipements</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-block">
+      <div class="stat-num">6→00h</div>
+      <div class="stat-label">Horaires 7j/7</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FEATURES ═══════════════════════════ -->
+<section class="section" id="features">
+  <div class="section-header reveal">
+    <div class="section-tag">Pourquoi FitZone Pro</div>
+    <h2 class="section-title">UNE EXPÉRIENCE<br><span class="title-accent">COMPLÈTE</span></h2>
+    <p class="section-sub">Des équipements de dernière génération et une équipe dédiée pour t'accompagner à chaque étape de ta transformation.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card feature-large reveal">
+      <div class="feature-icon-wrap"><span>🏋️</span></div>
+      <div class="feature-title">Équipements Premium</div>
+      <div class="feature-desc">Plus de 190 machines professionnelles régulièrement entretenues : cardio, musculation, fonctionnel et espace libre.</div>
+      <div class="feature-highlight">190+ machines</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon-wrap"><span>🎯</span></div>
+      <div class="feature-title">Coaching Expert</div>
+      <div class="feature-desc">18 coachs certifiés élaborent ton programme sur mesure et t'accompagnent vers tes objectifs.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon-wrap"><span>📅</span></div>
+      <div class="feature-title">Planning Flexible</div>
+      <div class="feature-desc">Ouvert 7j/7 de 6h à minuit. Réserve tes cours en ligne en quelques clics.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon-wrap"><span>📊</span></div>
+      <div class="feature-title">Suivi Digital</div>
+      <div class="feature-desc">Dashboard personnel pour suivre tes progrès, statistiques et objectifs en temps réel.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon-wrap"><span>🥗</span></div>
+      <div class="feature-title">Nutrition</div>
+      <div class="feature-desc">Conseils nutritionnels et plans alimentaires personnalisés par nos experts.</div>
+    </div>
+    <div class="feature-card feature-large reveal">
+      <div class="feature-icon-wrap"><span>🤝</span></div>
+      <div class="feature-title">Communauté</div>
+      <div class="feature-desc">Rejoins 342+ passionnés, participe aux défis collectifs et reste motivé au quotidien.</div>
+      <div class="feature-highlight">342+ membres</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ NOS COURS ═══════════════════════════ -->
+@if (courses.length > 0) {
+<section class="section" id="courses">
+  <div class="section-header reveal">
+    <div class="section-tag">Nos programmes</div>
+    <h2 class="section-title">COURS <span class="title-accent">POPULAIRES</span></h2>
+    <p class="section-sub">Des cours variés encadrés par nos coachs certifiés, adaptés à tous les niveaux.</p>
+  </div>
+
+  <div class="courses-home-grid">
+    @for (c of courses; track c.id) {
+      <div class="course-home-card reveal" [routerLink]="['/programmes', c.id]" style="cursor:pointer">
+        @if (c.photoUrl) {
+          <div class="course-home-photo"><img [src]="getPhotoUrl(c.photoUrl)" [alt]="c.name" /></div>
+        } @else {
+          <div class="course-home-icon">{{ getCourseIcon(c.name) }}</div>
+        }
+        <div class="course-home-body">
+          <div class="course-home-name">{{ c.name }}</div>
+          <div class="course-home-desc">{{ c.description || 'Programme adapté à tous les niveaux.' }}</div>
+          <div class="course-home-meta">
+            @if (c.durationMinutes) {
+              <span class="course-home-tag">⏱️ {{ c.durationMinutes }} min</span>
+            }
+            @if (c.capacity) {
+              <span class="course-home-tag">👥 {{ c.capacity }} places</span>
+            }
+          </div>
+        </div>
+        <div class="course-home-arrow">→</div>
+      </div>
+    }
+  </div>
+
+  <div style="text-align:center;margin-top:40px" class="reveal">
+    <a class="btn-hero btn-hero-primary" routerLink="/programmes" style="display:inline-flex;padding:14px 40px;font-size:15px">Voir tous les programmes →</a>
+  </div>
+</section>
+}
+
+<!-- ═══════════════════════════ TESTIMONIALS ═══════════════════════════ -->
+<section class="section" id="testimonials">
+  <div class="section-header reveal">
+    <div class="section-tag">Témoignages</div>
+    <h2 class="section-title">CE QUE DISENT <span class="title-accent">NOS MEMBRES</span></h2>
+    <p class="section-sub">Découvre les retours de ceux qui ont transformé leur quotidien avec FitZone Pro.</p>
+  </div>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"J'ai perdu 12 kg en 4 mois grâce au coaching personnalisé. L'équipe est incroyable et les équipements sont au top !"</p>
+      <div class="test-author">
+        <div class="test-avatar" style="background:linear-gradient(135deg,#f97316,#ea580c)">A</div>
+        <div>
+          <div class="test-name">Ahmed H.</div>
+          <div class="test-role">Membre Premium · 8 mois</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card featured-test reveal">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"La meilleure salle de Kénitra, sans hésitation. Les cours de CrossFit sont intenses et les coachs toujours disponibles. J'ai complètement changé de physique."</p>
+      <div class="test-author">
+        <div class="test-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">S</div>
+        <div>
+          <div class="test-name">Salma K.</div>
+          <div class="test-role">Membre Standard · 1 an</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="test-stars">★★★★★</div>
+      <p class="test-text">"Ambiance top, propreté irréprochable et horaires flexibles. Le suivi digital est un vrai plus pour rester motivé."</p>
+      <div class="test-author">
+        <div class="test-avatar" style="background:linear-gradient(135deg,#22c55e,#15803d)">Y</div>
+        <div>
+          <div class="test-name">Youssef B.</div>
+          <div class="test-role">Membre Premium · 6 mois</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ CTA BANNER ═══════════════════════════ -->
+<section class="cta-banner reveal">
+  <div class="cta-inner">
+    <div class="cta-glow"></div>
+    <div class="cta-content">
+      <h2 class="cta-title">Prêt à transformer ta vie ?</h2>
+      <p class="cta-sub">Rejoins FitZone Pro aujourd'hui et profite d'un accès complet à nos installations, coachs et programmes.</p>
+      <div class="cta-btns">
+        @if (!auth.isLoggedIn()) {
+          <a class="btn-hero btn-hero-primary" routerLink="/register" style="padding:16px 40px;font-size:16px">Commencer maintenant →</a>
+          <a class="btn-hero btn-hero-ghost" routerLink="/plans" style="padding:16px 32px;font-size:15px">Voir les tarifs</a>
+        } @else {
+          <a class="btn-hero btn-hero-primary" routerLink="/programmes" style="padding:16px 40px;font-size:16px">Explorer les programmes →</a>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-icon">🏋️</div>
+        <div class="logo-name">FitZone Pro</div>
+      </div>
+      <p class="footer-desc">La salle de sport premium à Kénitra. Ouverte 7j/7 pour vous accompagner vers vos objectifs.</p>
+      <div class="footer-socials">
+        <span class="social-link">📘</span>
+        <span class="social-link">📸</span>
+        <span class="social-link">🎵</span>
+        <span class="social-link">📧</span>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>La salle</h4>
+      <a (click)="scrollTo('features')">Nos avantages</a>
+      <a routerLink="/programmes">Programmes</a>
+      <a routerLink="/plans">Tarifs</a>
+      <a (click)="scrollTo('testimonials')">Témoignages</a>
+    </div>
+    <div class="footer-col">
+      <h4>Espace membre</h4>
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/register">S'inscrire</a>
+      <a routerLink="/members/me">Mon espace</a>
+      <a routerLink="/plans">Abonnements</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a>📍 Av. Mohammed V, Kénitra</a>
+      <a>📞 +212 537 XX XX XX</a>
+      <a>✉️ contact&#64;fitzone.ma</a>
+      <a>🕐 6h – 00h · 7j/7</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 FitZone Pro · Tous droits réservés</span>
+    <span>Fait avec 🧡 à Kénitra</span>
+  </div>
+</footer>
