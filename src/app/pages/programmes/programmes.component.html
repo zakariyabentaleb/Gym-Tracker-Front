@@ -11,38 +11,6 @@
     </div>
     <h1>TROUVEZ LE PROGRAMME<br><span>QUI VOUS CORRESPOND</span></h1>
     <p>Des cours variés encadrés par nos coachs certifiés, adaptés à tous les niveaux et objectifs.</p>
-
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-chip">
-        <div class="stat-icon">📚</div>
-        <div>
-          <div class="stat-val">{{ courses.length }}</div>
-          <div class="stat-lbl">Cours</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-icon">✅</div>
-        <div>
-          <div class="stat-val">{{ activeCourseCount }}</div>
-          <div class="stat-lbl">Actifs</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-icon">🗓️</div>
-        <div>
-          <div class="stat-val">{{ upcomingSchedules }}</div>
-          <div class="stat-lbl">Séances à venir</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-icon">🎯</div>
-        <div>
-          <div class="stat-val">{{ coaches.length }}</div>
-          <div class="stat-lbl">Coachs</div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- ═══════════ TOOLBAR ═══════════ -->
@@ -105,7 +73,7 @@
       </div>
     } @else {
       <div class="courses-grid">
-        @for (c of filteredCourses; track c.id) {
+        @for (c of pagedCourses; track c.id) {
           <div class="course-card" [routerLink]="['/programmes', c.id]">
             @if (c.photoUrl) {
               <div class="card-photo">
@@ -140,6 +108,17 @@
           </div>
         }
       </div>
+
+      <!-- Pagination Cours -->
+      @if (totalCoursePages > 1) {
+        <div class="pagination">
+          <button class="page-btn" [disabled]="coursePage === 1" (click)="goToCoursePage(coursePage - 1)">‹</button>
+          @for (p of getCoursePages(); track p) {
+            <button class="page-btn" [class.active]="p === coursePage" (click)="goToCoursePage(p)">{{ p }}</button>
+          }
+          <button class="page-btn" [disabled]="coursePage === totalCoursePages" (click)="goToCoursePage(coursePage + 1)">›</button>
+        </div>
+      }
     }
   }
 
@@ -153,7 +132,7 @@
       </div>
     } @else {
       <div class="schedules-grid">
-        @for (s of filteredSchedules; track s.id) {
+        @for (s of pagedSchedules; track s.id) {
           <div class="sched-card">
             <div class="sched-header">
               <div class="sched-icon">{{ getCourseIcon(getCourseName(s.courseId)) }}</div>
@@ -191,6 +170,17 @@
           </div>
         }
       </div>
+
+      <!-- Pagination Séances -->
+      @if (totalSchedulePages > 1) {
+        <div class="pagination">
+          <button class="page-btn" [disabled]="schedulePage === 1" (click)="goToSchedulePage(schedulePage - 1)">‹</button>
+          @for (p of getSchedulePages(); track p) {
+            <button class="page-btn" [class.active]="p === schedulePage" (click)="goToSchedulePage(p)">{{ p }}</button>
+          }
+          <button class="page-btn" [disabled]="schedulePage === totalSchedulePages" (click)="goToSchedulePage(schedulePage + 1)">›</button>
+        </div>
+      }
     }
   }
 </div>
