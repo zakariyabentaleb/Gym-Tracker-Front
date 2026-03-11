@@ -1,0 +1,31 @@
+<nav class="header-nav">
+  <a class="nav-logo" routerLink="/">
+    <div class="nav-logo-icon">🏋️</div>
+    <div class="nav-logo-text">Fit<span>Zone</span> Pro</div>
+  </a>
+
+  <div class="nav-links">
+    <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+    <a class="nav-link" routerLink="/programmes" routerLinkActive="active">Programmes</a>
+    <a class="nav-link" routerLink="/plans" routerLinkActive="active">Tarifs</a>
+
+    @if (auth.hasRole('ROLE_ADMIN')) {
+      <a class="nav-link" routerLink="/admin" routerLinkActive="active">Admin</a>
+    }
+    @if (auth.hasRole('ROLE_MEMBER')) {
+      <a class="nav-link" routerLink="/mes-inscriptions" routerLinkActive="active">📋 Mes Inscriptions</a>
+      <a class="nav-link" routerLink="/mon-abonnement" routerLinkActive="active">💳 Mon Abonnement</a>
+    }
+  </div>
+
+  <div class="nav-actions">
+    @if (!auth.isLoggedIn()) {
+      <a class="btn btn-outline" routerLink="/login">Connexion</a>
+      <a class="btn btn-primary" routerLink="/register">S'inscrire</a>
+    } @else {
+      <span class="user-role-badge">{{ auth.getUserRoles()[0] || 'User' }}</span>
+      <a class="btn btn-outline" routerLink="/members/me">Mon profil</a>
+      <button class="btn btn-outline" (click)="logout()">Logout</button>
+    }
+  </div>
+</nav>
