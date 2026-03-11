@@ -1,0 +1,105 @@
+<section class="abonnement-page">
+  <!-- Hero -->
+  <div class="abo-hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <span class="hero-badge">💳 Mon Abonnement</span>
+      <h1 class="hero-title">Gérez votre <span>Abonnement</span></h1>
+      <p class="hero-sub">Consultez les détails de votre abonnement et votre historique.</p>
+    </div>
+  </div>
+
+  <div class="abo-container">
+    @if (loading) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Chargement…</p>
+      </div>
+    } @else if (subscriptions.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>Aucun abonnement</h3>
+        <p>Vous n'avez pas encore souscrit à un abonnement.</p>
+        <a class="abo-cta" routerLink="/plans">Voir nos plans →</a>
+      </div>
+    } @else {
+      <!-- Active subscription card -->
+      @if (activeSub) {
+        <div class="active-card">
+          <div class="active-card-header">
+            <div class="active-badge">✅ Abonnement actif</div>
+            <div class="active-days">{{ daysRemaining() }} jours restants</div>
+          </div>
+
+          <div class="active-card-body">
+            <div class="active-plan-name">{{ getPlanName(activeSub.planId) }}</div>
+            <div class="active-price">{{ getPlanPrice(activeSub.planId) }}</div>
+
+            <div class="active-details">
+              <div class="detail-row">
+                <span class="detail-label">📅 Début</span>
+                <span class="detail-value">{{ formatDate(activeSub.startDate) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">📅 Fin</span>
+                <span class="detail-value">{{ formatDate(activeSub.endDate) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">⏱️ Durée</span>
+                <span class="detail-value">{{ getDurationLabel(activeSub.planId) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">🔄 Renouvellement auto</span>
+                <span class="detail-value">{{ activeSub.autoRenew ? 'Oui' : 'Non' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="progress-section">
+            <div class="progress-label">
+              <span>Progression de l'abonnement</span>
+              <span>{{ daysRemaining() }}j restants</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill"
+                   [style.width.%]="progressPercent()">
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- History -->
+      @if (pastSubs.length > 0) {
+        <div class="history-section">
+          <h2 class="history-title">📜 Historique</h2>
+          <div class="history-list">
+            @for (sub of pastSubs; track sub.id) {
+              <div class="history-card">
+                <div class="history-status" [class]="'status-' + sub.status.toLowerCase()">
+                  {{ statusLabel(sub.status) }}
+                </div>
+                <div class="history-info">
+                  <div class="history-plan">{{ getPlanName(sub.planId) }}</div>
+                  <div class="history-dates">
+                    {{ formatDate(sub.startDate) }} → {{ formatDate(sub.endDate) }}
+                  </div>
+                </div>
+                <div class="history-price">{{ getPlanPrice(sub.planId) }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- CTA -->
+      @if (!activeSub) {
+        <div class="renew-cta">
+          <p>Votre abonnement a expiré. Renouvelez-le maintenant !</p>
+          <a class="abo-cta" routerLink="/plans">Renouveler →</a>
+        </div>
+      }
+    }
+  </div>
+</section>
