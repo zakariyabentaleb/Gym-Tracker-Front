@@ -1,0 +1,5 @@
+<app-header *ngIf="!isHomePage && !isAdminPage"></app-header>
+
+<main [class.home-main]="isHomePage">
+  <router-outlet></router-outlet>
+</main>
