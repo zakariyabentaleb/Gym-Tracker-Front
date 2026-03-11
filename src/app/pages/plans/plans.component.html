@@ -1,0 +1,346 @@
+<section class="plans-page">
+  <!-- Background effects -->
+  <div class="bg-grid"></div>
+
+  <!-- Hero -->
+  <div class="plans-hero">
+    <div class="hero-content">
+      <div class="hero-tag">
+        <div class="tag-dot"></div>
+        Abonnements FitZone Pro
+      </div>
+      <h1 class="hero-title">
+        CHOISIS TON<br>
+        <span class="hero-accent">PLAN</span>
+      </h1>
+      <p class="hero-sub">Des formules conçues pour chaque objectif.<br>Rejoins la communauté FitZone et transforme ton quotidien.</p>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="stat-num">500<span class="stat-plus">+</span></span>
+          <span class="stat-label">Membres actifs</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">98<span class="stat-plus">%</span></span>
+          <span class="stat-label">Satisfaction</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">7<span class="stat-plus">j/7</span></span>
+          <span class="stat-label">Accès illimité</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active subscription banner -->
+  @if (auth.hasRole('ROLE_MEMBER') && activeSub) {
+    <div class="active-sub-banner">
+      <div class="active-sub-inner">
+        <div class="active-sub-glow"></div>
+        <div class="active-sub-icon">✅</div>
+        <div class="active-sub-info">
+          <div class="active-sub-title">Abonnement actif</div>
+          <div class="active-sub-details">
+            Du {{ formatDate(activeSub.startDate) }} au {{ formatDate(activeSub.endDate) }}
+          </div>
+        </div>
+        <a class="active-sub-link" routerLink="/mon-abonnement">
+          Voir mon abonnement
+          <span class="link-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- Toast messages -->
+  @if (subscribeSuccess) {
+    <div class="toast toast-success">
+      <span>✅</span> {{ subscribeSuccess }}
+      <button class="toast-close" (click)="subscribeSuccess = ''">✕</button>
+    </div>
+  }
+  @if (subscribeError) {
+    <div class="toast toast-error">
+      <span>❌</span> {{ subscribeError }}
+      <button class="toast-close" (click)="subscribeError = ''">✕</button>
+    </div>
+  }
+
+  <!-- Plans grid -->
+  <div class="plans-container">
+    @if (loading) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Chargement des plans…</p>
+      </div>
+    } @else if (plans.length === 0) {
+      <div class="empty-box">
+        <div class="empty-icon">📋</div>
+        <h3>Aucun plan disponible</h3>
+        <p>Les plans d'abonnement seront bientôt disponibles.</p>
+      </div>
+    } @else {
+      <div class="plans-grid">
+        @for (plan of plans; track plan.id; let i = $index) {
+          <div class="plan-card" [class.featured]="i === 1 && plans.length > 1" [class.current-plan]="isActivePlan(plan.id)">
+            <div class="card-inner">
+              @if (i === 1 && plans.length > 1) {
+                <div class="plan-ribbon">
+                  <span class="ribbon-star">⭐</span> POPULAIRE
+                </div>
+              }
+              @if (isActivePlan(plan.id)) {
+                <div class="plan-current-badge">
+                  <span class="badge-pulse"></span>
+                  Votre plan actuel
+                </div>
+              }
+
+              <!-- Tier label -->
+              <div class="plan-tier">
+                @if (i === 0) { STARTER }
+                @else if (i === 1) { PRO }
+                @else if (i === 2) { ELITE }
+                @else { CUSTOM }
+              </div>
+
+              <div class="plan-header">
+                <div class="plan-icon-wrap">
+                  <div class="plan-icon" [class.icon-featured]="i === 1 && plans.length > 1">
+                    @if (i === 0) { 🎫 }
+                    @else if (i === 1) { 👑 }
+                    @else if (i === 2) { 💎 }
+                    @else { 💳 }
+                  </div>
+                </div>
+                <h3 class="plan-name">{{ plan.name }}</h3>
+                <div class="plan-duration">{{ getDurationLabel(plan.durationDays) }}</div>
+              </div>
+
+              <div class="plan-price">
+                <span class="price-int">{{ formatPriceInt(plan.priceCents) }}</span>
+                <div class="price-right">
+                  <span class="price-dec">.{{ formatPriceDec(plan.priceCents) }}</span>
+                  <span class="price-currency">MAD</span>
+                </div>
+              </div>
+              <div class="price-period">/ {{ getDurationLabel(plan.durationDays) }}</div>
+
+              <div class="plan-divider">
+                <div class="divider-line"></div>
+                <span class="divider-label">Ce qui est inclus</span>
+                <div class="divider-line"></div>
+              </div>
+
+              <div class="plan-features">
+                @if (plan.description) {
+                  <div class="feature-item">
+                    <span class="feature-check">✓</span>
+                    <span>{{ plan.description }}</span>
+                  </div>
+                }
+                <div class="feature-item">
+                  <span class="feature-check">✓</span>
+                  <span>Accès {{ getDurationLabel(plan.durationDays) }}</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-check" [class.feature-no]="!plan.includesClasses">{{ plan.includesClasses ? '✓' : '✗' }}</span>
+                  <span [class.muted]="!plan.includesClasses">Cours collectifs inclus</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-check">✓</span>
+                  <span>Accès salle de musculation</span>
+                </div>
+                <div class="feature-item">
+                  <span class="feature-check">✓</span>
+                  <span>Vestiaires & douches</span>
+                </div>
+                @if (i >= 1) {
+                  <div class="feature-item">
+                    <span class="feature-check">✓</span>
+                    <span>Suivi personnalisé</span>
+                  </div>
+                }
+                @if (i >= 2) {
+                  <div class="feature-item">
+                    <span class="feature-check">✓</span>
+                    <span>Programme nutrition</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Subscribe button logic -->
+              @if (auth.hasRole('ROLE_MEMBER')) {
+                @if (isActivePlan(plan.id)) {
+                  <div class="plan-btn plan-btn-current">
+                    <span class="btn-icon">✅</span> Abonnement actif
+                  </div>
+                } @else if (activeSub) {
+                  <div class="plan-btn plan-btn-disabled" title="Vous avez déjà un abonnement actif">
+                    Changer indisponible
+                  </div>
+                } @else {
+                  <button class="plan-btn" [class.plan-btn-featured]="i === 1 && plans.length > 1"
+                          [disabled]="subscribing"
+                          (click)="openPaypalModal(plan)">
+                    @if (subscribing) {
+                      <div class="btn-spinner"></div> Traitement…
+                    } @else {
+                      <span class="btn-icon">💳</span> Payer avec PayPal
+                      <span class="btn-arrow">→</span>
+                    }
+                  </button>
+                }
+              } @else if (auth.isLoggedIn()) {
+                <div class="plan-btn plan-btn-disabled">
+                  Réservé aux membres
+                </div>
+              } @else {
+                <a class="plan-btn" [class.plan-btn-featured]="i === 1 && plans.length > 1" routerLink="/register">
+                  Commencer maintenant
+                  <span class="btn-arrow">→</span>
+                </a>
+              }
+
+              <!-- Guarantee -->
+              <div class="plan-guarantee">
+                🔒 Satisfait ou remboursé sous 7 jours
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Trust badges -->
+  <div class="trust-section">
+    <div class="trust-inner">
+      <div class="trust-item">
+        <span class="trust-icon">🔒</span>
+        <span>Paiement sécurisé</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">🔄</span>
+        <span>Sans engagement</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">⚡</span>
+        <span>Activation immédiate</span>
+      </div>
+      <div class="trust-sep"></div>
+      <div class="trust-item">
+        <span class="trust-icon">💬</span>
+        <span>Support 24/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why Choose Us -->
+  <div class="why-section">
+    <div class="why-header">
+      <span class="section-tag">Pourquoi nous choisir</span>
+      <h2 class="section-title">L'expérience <span>FitZone</span></h2>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-glow"></div>
+        <div class="info-icon-wrap">
+          <div class="info-icon">🏋️</div>
+        </div>
+        <h4>Équipements Premium</h4>
+        <p>+190 machines de dernière génération pour un entraînement optimal</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-glow"></div>
+        <div class="info-icon-wrap">
+          <div class="info-icon">🎯</div>
+        </div>
+        <h4>Coachs Certifiés</h4>
+        <p>Des professionnels diplômés pour vous guider vers vos objectifs</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-glow"></div>
+        <div class="info-icon-wrap">
+          <div class="info-icon">🕐</div>
+        </div>
+        <h4>Horaires Flexibles</h4>
+        <p>Ouvert de 6h à minuit, 7 jours sur 7, même les jours fériés</p>
+      </div>
+      <div class="info-card">
+        <div class="info-card-glow"></div>
+        <div class="info-icon-wrap">
+          <div class="info-icon">🧘</div>
+        </div>
+        <h4>Espace Bien-être</h4>
+        <p>Sauna, hammam et zone de relaxation pour récupérer en douceur</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Banner -->
+  <div class="cta-section">
+    <div class="cta-inner">
+      <div class="cta-bg-shape"></div>
+      <h2 class="cta-title">Prêt à commencer ?</h2>
+      <p class="cta-sub">Rejoignez +500 membres satisfaits et transformez votre corps dès aujourd'hui.</p>
+      @if (!auth.isLoggedIn()) {
+        <a class="cta-btn" routerLink="/register">
+          S'inscrire gratuitement
+          <span class="btn-arrow">→</span>
+        </a>
+      } @else if (!activeSub && auth.hasRole('ROLE_MEMBER')) {
+        <button class="cta-btn" (click)="scrollToPlans()">
+          Choisir un plan
+          <span class="btn-arrow">→</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- PayPal Payment Modal -->
+  @if (showPaypalModal && selectedPlan) {
+    <div class="paypal-overlay" (click)="closePaypalModal()">
+      <div class="paypal-modal" (click)="$event.stopPropagation()">
+        <button class="modal-close" (click)="closePaypalModal()">✕</button>
+
+        <div class="modal-header">
+          <div class="modal-icon">💳</div>
+          <h2 class="modal-title">Paiement sécurisé</h2>
+          <p class="modal-sub">Finalisez votre abonnement via PayPal</p>
+        </div>
+
+        <div class="modal-plan-summary">
+          <div class="summary-row">
+            <span class="summary-label">Plan</span>
+            <span class="summary-value">{{ selectedPlan.name }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Durée</span>
+            <span class="summary-value">{{ getDurationLabel(selectedPlan.durationDays) }}</span>
+          </div>
+          <div class="summary-row summary-total">
+            <span class="summary-label">Total</span>
+            <span class="summary-value">{{ formatPrice(selectedPlan.priceCents) }} MAD</span>
+          </div>
+        </div>
+
+        @if (!paypalLoaded) {
+          <div class="loading-box">
+            <div class="spinner"></div>
+            <p>Chargement de PayPal…</p>
+          </div>
+        }
+        <div id="paypal-button-container" class="paypal-btn-container"></div>
+
+        <div class="modal-secure">
+          🔒 Paiement sécurisé par PayPal
+        </div>
+      </div>
+    </div>
+  }
+</section>
