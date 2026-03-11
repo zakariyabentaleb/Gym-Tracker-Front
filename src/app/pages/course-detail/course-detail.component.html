@@ -1,0 +1,163 @@
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<!-- LOADING -->
+@if (loading) {
+  <div class="detail-wrap">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement du cours…</p>
+    </div>
+  </div>
+}
+
+<!-- NOT FOUND -->
+@if (!loading && notFound) {
+  <div class="detail-wrap">
+    <div class="not-found">
+      <div class="nf-icon">😕</div>
+      <h2>Cours introuvable</h2>
+      <p>Ce cours n'existe pas ou a été supprimé.</p>
+      <button class="btn-back" (click)="goBack()">← Retour aux programmes</button>
+    </div>
+  </div>
+}
+
+<!-- COURSE DETAIL -->
+@if (!loading && !notFound && course) {
+  <div class="detail-wrap">
+
+    <!-- BACK -->
+    <button class="btn-back-top" (click)="goBack()">← Retour aux programmes</button>
+
+    <!-- HERO CARD -->
+    <div class="hero-card">
+      @if (course.photoUrl) {
+        <div class="hero-photo">
+          <img [src]="getPhotoUrl(course.photoUrl)" [alt]="course.name" />
+          <div class="hero-overlay"></div>
+        </div>
+      }
+      <div class="hero-body" [class.no-photo]="!course.photoUrl">
+        <div class="hero-icon">{{ getCourseIcon(course.name) }}</div>
+        <h1 class="hero-title">{{ course.name }}</h1>
+        <div class="hero-badge" [class.badge-active]="course.active !== false" [class.badge-inactive]="course.active === false">
+          {{ course.active !== false ? '✅ Actif' : '⏸️ Inactif' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO GRID -->
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">⏱️</div>
+        <div class="info-label">Durée</div>
+        <div class="info-value">{{ getDurationLabel(course.durationMinutes) }}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">👥</div>
+        <div class="info-label">Capacité</div>
+        <div class="info-value">{{ course.capacity || '—' }} places</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🗓️</div>
+        <div class="info-label">Séances à venir</div>
+        <div class="info-value">{{ schedules.length }}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">📊</div>
+        <div class="info-label">Statut</div>
+        <div class="info-value" [style.color]="course.active !== false ? 'var(--green)' : 'var(--red)'">
+          {{ course.active !== false ? 'Disponible' : 'Indisponible' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="section">
+      <h2 class="section-title">📝 Description</h2>
+      <div class="desc-box">
+        <p>{{ course.description || 'Aucune description disponible pour ce cours.' }}</p>
+      </div>
+    </div>
+
+    <!-- SÉANCES -->
+    <div class="section">
+      <h2 class="section-title">🗓️ Séances programmées</h2>
+
+      <!-- ENROLL MESSAGE -->
+      @if (enrollMessage) {
+        <div class="enroll-alert" [class.alert-success]="enrollMessageType === 'success'" [class.alert-error]="enrollMessageType === 'error'" [class.alert-info]="enrollMessageType === 'info'">
+          {{ enrollMessage }}
+        </div>
+      }
+
+      @if (!isLoggedIn && schedules.length > 0) {
+        <div class="login-prompt">
+          <span>🔒</span>
+          <p>Connectez-vous en tant que membre pour vous inscrire aux séances.</p>
+          <button class="btn-login" routerLink="/login">Se connecter</button>
+        </div>
+      }
+
+      @if (schedules.length === 0) {
+        <div class="empty-schedules">
+          <div class="empty-ico">📭</div>
+          <p>Aucune séance programmée pour ce cours.</p>
+        </div>
+      } @else {
+        <div class="schedules-list">
+          @for (s of schedules; track s.id) {
+            <div class="sched-row" [class.sched-expired]="isScheduleExpired(s)">
+              <div class="sched-date-block">
+                <div class="sched-day">{{ formatDate(s.startTime) }}</div>
+                <div class="sched-time">{{ formatTime(s.startTime) }} – {{ formatTime(s.endTime) }}</div>
+              </div>
+              <div class="sched-info">
+                <div class="sched-chip">🎯 {{ getCoachName(s.coachId) }}</div>
+                @if (s.room) {
+                  <div class="sched-chip">🏠 {{ s.room }}</div>
+                }
+                @if (getRemainingCapacity(s) !== null) {
+                  <div class="sched-chip" [class.chip-full]="getRemainingCapacity(s) === 0" [class.chip-low]="getRemainingCapacity(s)! > 0 && getRemainingCapacity(s)! <= 3">
+                    👥 <strong>{{ getRemainingCapacity(s) }}</strong> / {{ s.capacity ?? course!.capacity }} places
+                  </div>
+                }
+              </div>
+              @if (isScheduleExpired(s)) {
+                <span class="badge-expired">⌛ Expirée</span>
+              }
+              <!-- ENROLL / CANCEL BUTTON -->
+              @if (isMember && !isScheduleExpired(s)) {
+                @if (getBookingForSchedule(s.id); as booking) {
+                  @if (booking.status === 'CONFIRMED') {
+                    <button class="btn-enrolled" (click)="cancelBooking(booking.id!)" [disabled]="cancellingBookingId === booking.id">
+                      @if (cancellingBookingId === booking.id) {
+                        <span class="btn-spinner"></span>
+                      } @else {
+                        ✅ Inscrit — Annuler
+                      }
+                    </button>
+                  } @else if (booking.status === 'WAITING') {
+                    <button class="btn-waiting" disabled>
+                      ⏳ En attente
+                    </button>
+                  }
+                } @else {
+                  <button class="btn-enroll" (click)="enroll(s.id)" [disabled]="enrollingScheduleId === s.id">
+                    @if (enrollingScheduleId === s.id) {
+                      <span class="btn-spinner"></span>
+                    } @else {
+                      🎯 S'inscrire
+                    }
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+}
