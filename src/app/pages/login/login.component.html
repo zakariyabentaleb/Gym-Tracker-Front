@@ -1,0 +1,59 @@
+<div class="auth-page">
+  <!-- background effects -->
+  <div class="bg-canvas"></div>
+  <div class="bg-grid"></div>
+
+  <div class="auth-card">
+    <div class="card-glow"></div>
+
+    <!-- close / back to home -->
+    <a routerLink="/" class="card-close">✕</a>
+
+    <div class="card-header">
+      <div class="card-icon">🔑</div>
+      <h2 class="card-title">Connexion</h2>
+      <p class="card-sub">Accédez à votre espace FitZone</p>
+    </div>
+
+    <div class="card-body">
+      @if (error) {
+        <div class="form-error">{{ error }}</div>
+      }
+
+      <form (ngSubmit)="submit()">
+        <div class="form-group">
+          <label class="form-label">Nom d'utilisateur</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">👤</span>
+            <input class="form-input" name="username" [(ngModel)]="username"
+                   placeholder="votre nom d'utilisateur" autocomplete="username" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <div class="input-icon-wrap">
+            <span class="input-icon">🔒</span>
+            <input class="form-input" type="password" name="password" [(ngModel)]="password"
+                   placeholder="••••••••" autocomplete="current-password" required />
+          </div>
+        </div>
+
+        <button class="btn-submit" type="submit" [disabled]="loading || !username || !password">
+          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>ou continuer avec</span>
+      </div>
+
+      <button class="btn-social">🔵 Google</button>
+      <button class="btn-social">🟢 Facebook</button>
+    </div>
+
+    <div class="card-footer">
+      Pas encore membre ? <a routerLink="/register">Créer un compte</a>
+    </div>
+  </div>
+</div>
