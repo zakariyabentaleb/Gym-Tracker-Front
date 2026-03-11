@@ -407,6 +407,46 @@
   animation: spin .8s linear infinite; margin: 0 auto 16px;
 }
 
+/* ═══════════ PAGINATION ═══════════ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 36px;
+}
+.page-btn {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-btn:hover:not(:disabled):not(.active) {
+  border-color: rgba(249,115,22,0.3);
+  background: rgba(249,115,22,0.06);
+  color: rgba(255,255,255,0.8);
+}
+.page-btn.active {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(249,115,22,0.3);
+}
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* ═══════════ ANIMATIONS ═══════════ */
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse {
