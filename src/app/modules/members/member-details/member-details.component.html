@@ -1,0 +1,64 @@
+<div class="page-shell">
+  @if (member) {
+    <div class="details-header">
+      <div>
+        <h1 class="page-title">{{ member.firstName }} {{ member.lastName }}</h1>
+        <p class="page-subtitle">Member #{{ member.id }}</p>
+      </div>
+      <div class="header-actions">
+        <a [routerLink]="['/members', member.id, 'edit']" class="btn btn-primary">✏️ Edit</a>
+        @if (auth.hasRole('ROLE_ADMIN')) {
+          <button class="btn btn-danger" (click)="onDelete()">🗑️ Delete</button>
+        }
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="card detail-card">
+        <h3 class="detail-label">👤 Personal Info</h3>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-key">First name</span>
+            <span class="detail-value">{{ member.firstName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Last name</span>
+            <span class="detail-value">{{ member.lastName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Phone</span>
+            <span class="detail-value">{{ member.phone || '—' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Birth date</span>
+            <span class="detail-value">{{ member.birthDate || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card detail-card">
+        <h3 class="detail-label">📋 Account</h3>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-key">User ID</span>
+            <span class="detail-value">{{ member.userId }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Status</span>
+            <span class="pill" [class.pill-ok]="member.active" [class.pill-warn]="!member.active">
+              {{ member.active ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="back-link">
+      <a routerLink="/members" class="btn btn-ghost">← Back to members</a>
+    </div>
+  } @else {
+    <div class="card loading-card">
+      <p>Loading member details…</p>
+    </div>
+  }
+</div>
