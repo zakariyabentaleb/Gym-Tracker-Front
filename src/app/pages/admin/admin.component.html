@@ -1,0 +1,1023 @@
+<div class="layout">
+
+  <!-- ════════════════════ SIDEBAR ════════════════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🏋️</div>
+      <div>
+        <div class="brand-name">Fit<span>Zone</span></div>
+        <div class="brand-sub">Espace Admin</div>
+      </div>
+    </div>
+
+    <div class="sidebar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Rechercher…" [(ngModel)]="searchQuery">
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item" [class.active]="activePage === 'dashboard'" (click)="goTo('dashboard')">
+        <span class="nav-icon">📊</span><span class="nav-label">Tableau de bord</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'membres'" (click)="goTo('membres')">
+        <span class="nav-icon">👥</span><span class="nav-label">Membres</span>
+        <span class="nav-badge badge-orange">{{ totalMembers }}</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'planning'" (click)="goTo('planning')">
+        <span class="nav-icon">📅</span><span class="nav-label">Planning</span>
+        <span class="nav-badge badge-green">6</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'coachs'" (click)="goTo('coachs')">
+        <span class="nav-icon">🎯</span><span class="nav-label">Coachs</span>
+        <span class="nav-badge badge-green">{{ totalCoaches }}</span>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Gestion</div>
+      <div class="nav-item" [class.active]="activePage === 'abonnements'" (click)="goTo('abonnements')">
+        <span class="nav-icon">💳</span><span class="nav-label">Abonnements</span>
+        <span class="nav-badge badge-red">{{ totalPlans }}</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'equipements'" (click)="goTo('equipements')">
+        <span class="nav-icon">🔧</span><span class="nav-label">Équipements</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'finances'" (click)="goTo('finances')">
+        <span class="nav-icon">💰</span><span class="nav-label">Finances</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'rapports'" (click)="goTo('rapports')">
+        <span class="nav-icon">📈</span><span class="nav-label">Rapports</span>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Système</div>
+      <div class="nav-item" [class.active]="activePage === 'notifications'" (click)="goTo('notifications')">
+        <span class="nav-icon">🔔</span><span class="nav-label">Notifications</span>
+        <span class="nav-badge badge-orange">5</span>
+      </div>
+      <div class="nav-item" [class.active]="activePage === 'parametres'" (click)="goTo('parametres')">
+        <span class="nav-icon">⚙️</span><span class="nav-label">Paramètres</span>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="nav-item logout-item" (click)="logout()" style="color:#ef4444;margin-bottom:10px;cursor:pointer">
+        <span class="nav-icon">🚪</span><span class="nav-label">Déconnexion</span>
+      </div>
+      <div class="user-block" (click)="goTo('parametres')">
+        <div class="user-av">{{ adminInitial }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ adminName }}</div>
+          <div class="user-role">Gérant principal</div>
+        </div>
+        <span class="user-more">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ════════════════════ MAIN ════════════════════ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="page-title">{{ pageTitle }}</div>
+          <div class="breadcrumb">FitZone Pro → <span>{{ pageBreadcrumb }}</span></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="tb-date">📆 {{ todayDate }}</div>
+        <div class="topbar-btn">🔍</div>
+        <div class="topbar-btn">
+          🔔<div class="notif-pip"></div>
+        </div>
+        <button class="btn-add" (click)="openMemberModal()">
+          ＋ Nouveau membre
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ════════════════════ PAGE: DASHBOARD ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'dashboard'">
+
+        <!-- ALERTS -->
+        @if (showAlertMaintenance) {
+          <div class="alert alert-err">
+            <span class="alert-icon">⚠️</span>
+            <span class="alert-txt"><strong>3 rameurs</strong> nécessitent une maintenance urgente — intervention requise avant lundi</span>
+            <span class="alert-close" (click)="showAlertMaintenance = false">✕</span>
+          </div>
+        }
+        @if (showAlertExpiring) {
+          <div class="alert alert-warn">
+            <span class="alert-icon">⏰</span>
+            <span class="alert-txt"><strong>24 abonnements</strong> expirent dans moins de 7 jours — envoyer rappels automatiques</span>
+            <span class="alert-close" (click)="showAlertExpiring = false">✕</span>
+          </div>
+        }
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-icon ico-orange">👥</div>
+              <span class="kpi-delta up">↑ +8%</span>
+            </div>
+            <div class="kpi-val">{{ totalMembers }}</div>
+            <div class="kpi-lbl">Membres actifs</div>
+            <div class="kpi-sub">↑ 27 nouveaux ce mois</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-icon ico-green">💰</div>
+              <span class="kpi-delta up">↑ +12%</span>
+            </div>
+            <div class="kpi-val">18 450</div>
+            <div class="kpi-lbl">Revenus mars (MAD)</div>
+            <div class="kpi-sub">Objectif : 20 000 MAD</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-icon ico-blue">🏃</div>
+              <span class="kpi-delta up">↑ +5</span>
+            </div>
+            <div class="kpi-val">67</div>
+            <div class="kpi-lbl">Présents maintenant</div>
+            <div class="kpi-sub">Capacité max : 116</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-top">
+              <div class="kpi-icon ico-red">⚠️</div>
+              <span class="kpi-delta down">↓ Urgent</span>
+            </div>
+            <div class="kpi-val">24</div>
+            <div class="kpi-lbl">Abonnements expirant</div>
+            <div class="kpi-sub">Dans les 7 prochains jours</div>
+          </div>
+        </div>
+
+        <!-- ROW 1 -->
+        <div class="grid-a" style="margin-bottom:16px;">
+          <!-- BAR CHART -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Fréquentation hebdomadaire</div>
+                <div class="card-meta">Entrées par jour — semaine courante</div>
+              </div>
+              <div class="live"><div class="live-dot"></div> En direct</div>
+            </div>
+            <div class="tabs">
+              <div class="tab" [class.active]="chartTab === 'week'" (click)="chartTab = 'week'">Semaine</div>
+              <div class="tab" [class.active]="chartTab === 'month'" (click)="chartTab = 'month'">Mois</div>
+              <div class="tab" [class.active]="chartTab === 'year'" (click)="chartTab = 'year'">Année</div>
+            </div>
+            <div class="bar-chart">
+              @for (day of chartDays; track day.label) {
+                <div class="bc-group">
+                  <div class="bc-bar a" [style.height.%]="day.men" [attr.data-v]="day.menVal"></div>
+                  <div class="bc-bar b" [style.height.%]="day.women" [attr.data-v]="day.womenVal"></div>
+                  <div class="bc-lbl">{{ day.label }}</div>
+                </div>
+              }
+            </div>
+            <div style="display:flex;gap:16px;margin-top:10px;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                <div style="width:10px;height:10px;border-radius:3px;background:var(--accent);"></div> Hommes
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                <div style="width:10px;height:10px;border-radius:3px;background:rgba(59,130,246,0.45);"></div> Femmes
+              </div>
+              <div style="margin-left:auto;font-size:12px;color:var(--muted);">Total semaine : <strong style="color:var(--text)">330</strong> entrées</div>
+            </div>
+          </div>
+
+          <!-- REVENUS RING -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Revenus par plan</div>
+                <div class="card-meta">Répartition · mars 2026</div>
+              </div>
+              <span class="card-action">Détails →</span>
+            </div>
+            <div class="ring-wrap" style="margin-top:6px;">
+              <div class="ring">
+                <svg width="110" height="110" viewBox="0 0 110 110">
+                  <circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--accent)" stroke-width="12"
+                    stroke-dasharray="124.3 152.4" stroke-dashoffset="0" stroke-linecap="round"/>
+                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--blue)" stroke-width="12"
+                    stroke-dasharray="83.1 193.6" stroke-dashoffset="-127.3" stroke-linecap="round"/>
+                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--green)" stroke-width="12"
+                    stroke-dasharray="69.1 207.6" stroke-dashoffset="-212.4" stroke-linecap="round"/>
+                </svg>
+                <div class="ring-center">
+                  <div class="ring-num">18k</div>
+                  <div class="ring-unit">MAD</div>
+                </div>
+              </div>
+              <div class="ring-legend">
+                <div class="rl-item">
+                  <div class="rl-dot" style="background:var(--accent)"></div>
+                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Premium</div><div style="font-size:10px;color:var(--muted)">154 membres</div></div>
+                  <div class="rl-val" style="color:var(--accent)">8 302</div>
+                </div>
+                <div class="rl-item">
+                  <div class="rl-dot" style="background:var(--blue)"></div>
+                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Standard</div><div style="font-size:10px;color:var(--muted)">103 membres</div></div>
+                  <div class="rl-val" style="color:var(--blue)">5 535</div>
+                </div>
+                <div class="rl-item">
+                  <div class="rl-dot" style="background:var(--green)"></div>
+                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Journalier</div><div style="font-size:10px;color:var(--muted)">85 entrées</div></div>
+                  <div class="rl-val" style="color:var(--green)">4 613</div>
+                </div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--green)">+12%</div>
+                <div style="font-size:10px;color:var(--muted)">vs mois dernier</div>
+              </div>
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px">204k</div>
+                <div style="font-size:10px;color:var(--muted)">YTD total</div>
+              </div>
+              <div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)">53</div>
+                <div style="font-size:10px;color:var(--muted)">MAD/membre</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2 -->
+        <div class="grid-3" style="margin-bottom:16px;">
+          <!-- PLANNING TODAY -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Planning du jour</div>
+                <div class="card-meta">Dimanche 8 mars</div>
+              </div>
+              <span class="card-action">Gérer +</span>
+            </div>
+            <div class="sched-item">
+              <div class="sched-time">07:00</div>
+              <div class="sched-info"><div class="sched-name">CrossFit Matinal</div><div class="sched-meta">Coach Hassan · Salle A</div></div>
+              <div class="sched-spots"><div style="color:var(--accent)">18/20</div><div class="sched-bar"><div class="sched-fill" style="width:90%;background:var(--accent)"></div></div></div>
+            </div>
+            <div class="sched-item">
+              <div class="sched-time">09:30</div>
+              <div class="sched-info"><div class="sched-name">Yoga & Pilates</div><div class="sched-meta">Coach Leila · Salle B</div></div>
+              <div class="sched-spots"><div style="color:var(--blue)">12/20</div><div class="sched-bar"><div class="sched-fill" style="width:60%;background:var(--blue)"></div></div></div>
+            </div>
+            <div class="sched-item">
+              <div class="sched-time">12:00</div>
+              <div class="sched-info"><div class="sched-name">Musculation libre</div><div class="sched-meta">Accès libre · Zone Cardio</div></div>
+              <div class="sched-spots"><div style="color:var(--green)">8/20</div><div class="sched-bar"><div class="sched-fill" style="width:40%;background:var(--green)"></div></div></div>
+            </div>
+            <div class="sched-item">
+              <div class="sched-time">18:00</div>
+              <div class="sched-info"><div class="sched-name">Zumba</div><div class="sched-meta">Coach Sara · Salle A</div></div>
+              <div class="sched-spots"><div style="color:var(--purple)">15/20</div><div class="sched-bar"><div class="sched-fill" style="width:75%;background:var(--purple)"></div></div></div>
+            </div>
+          </div>
+
+          <!-- OCCUPATION EN DIRECT -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Occupation en direct</div>
+                <div class="card-meta">Par zone · maintenant</div>
+              </div>
+              <div class="live"><div class="live-dot"></div>67</div>
+            </div>
+            <div class="occ-row"><div class="occ-zone">🏋️ Musculation</div><div class="occ-track"><div class="occ-fill" style="width:75%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div><div class="occ-num">30/40</div></div>
+            <div class="occ-row"><div class="occ-zone">🚴 Cardio</div><div class="occ-track"><div class="occ-fill" style="width:60%;background:linear-gradient(90deg,var(--blue),#93c5fd)"></div></div><div class="occ-num">15/25</div></div>
+            <div class="occ-row"><div class="occ-zone">🧘 Yoga</div><div class="occ-track"><div class="occ-fill" style="width:40%;background:linear-gradient(90deg,var(--purple),#d8b4fe)"></div></div><div class="occ-num">8/20</div></div>
+            <div class="occ-row"><div class="occ-zone">🥊 Boxe</div><div class="occ-track"><div class="occ-fill" style="width:67%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div class="occ-num">10/15</div></div>
+            <div class="occ-row"><div class="occ-zone">🏊 Piscine</div><div class="occ-track"><div class="occ-fill" style="width:25%;background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div></div><div class="occ-num">4/16</div></div>
+            <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px">
+                <span>Taux d'occupation total</span>
+                <span style="font-weight:700;color:var(--accent)">57.7%</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" style="width:57.7%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div>
+            </div>
+          </div>
+
+          <!-- ACTIVITÉ RÉCENTE -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Activité récente</div>
+                <div class="card-meta">Dernières actions · aujourd'hui</div>
+              </div>
+              <span class="card-action">Voir tout →</span>
+            </div>
+            <div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div class="feed-body"><div class="feed-txt"><strong>Ahmed Harrak</strong> a renouvelé son abonnement Premium</div><div class="feed-time">Il y a 4 min</div></div></div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--blue)"></div><div class="feed-body"><div class="feed-txt"><strong>Salma Kettani</strong> a réservé CrossFit 18h00</div><div class="feed-time">Il y a 11 min</div></div></div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--accent)"></div><div class="feed-body"><div class="feed-txt"><strong>Nouveau membre</strong> Youssef Benali inscrit — Plan Standard</div><div class="feed-time">Il y a 27 min</div></div></div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--red)"></div><div class="feed-body"><div class="feed-txt"><strong>Équipement</strong> Rameur #4 signalé en panne</div><div class="feed-time">Il y a 45 min</div></div></div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--purple)"></div><div class="feed-body"><div class="feed-txt"><strong>Nadia Mansouri</strong> abonnement expiré — rappel envoyé</div><div class="feed-time">Il y a 1h</div></div></div>
+              <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div class="feed-body"><div class="feed-txt"><strong>Paiement reçu</strong> 399 MAD · Karim Alaoui</div><div class="feed-time">Il y a 1h 20min</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: MEMBRES ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'membres'">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">👥</div><span class="kpi-delta up">↑ +8%</span></div><div class="kpi-val">{{ totalMembers }}</div><div class="kpi-lbl">Total membres</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta up">↑ +5</span></div><div class="kpi-val">{{ activeMembers }}</div><div class="kpi-lbl">Actifs</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-red">⏰</div><span class="kpi-delta down">↑ +3</span></div><div class="kpi-val">24</div><div class="kpi-lbl">Expirant bientôt</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-purple">🆕</div><span class="kpi-delta up">↑ +27</span></div><div class="kpi-val">27</div><div class="kpi-lbl">Nouveaux ce mois</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Gestion des membres</div><div class="card-meta">{{ totalMembers }} membres enregistrés</div></div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input class="form-input" style="width:220px;padding:8px 12px;font-size:12px" placeholder="🔍 Rechercher un membre…" [(ngModel)]="memberSearch" (ngModelChange)="loadMembers()">
+              <button class="btn-add" (click)="openMemberModal()">＋ Ajouter</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Membre</th><th>Téléphone</th><th>Statut</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                @for (m of members; track m.id) {
+                  <tr>
+                    <td>
+                      <div class="av-row">
+                        <div class="av" style="background:linear-gradient(135deg,var(--accent),#ea580c)">{{ getInitials(m) }}</div>
+                        <div class="av-info"><div class="av-name">{{ m.firstName }} {{ m.lastName }}</div></div>
+                      </div>
+                    </td>
+                    <td>{{ m.phone || '—' }}</td>
+                    <td><span class="pill" [class.pill-green]="m.active" [class.pill-red]="!m.active">{{ m.active ? 'Actif' : 'Inactif' }}</span></td>
+                    <td><span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editMember(m)">✏️ Modifier</span></td>
+                  </tr>
+                }
+                @if (members.length === 0) {
+                  <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Aucun membre trouvé</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span>Affichage {{ members.length }} sur {{ totalMembers }} membres</span>
+            <div class="pager-btns">
+              <div class="pager-btn" (click)="prevPage()" [style.opacity]="currentPage === 0 ? 0.4 : 1">‹</div>
+              <div class="pager-btn active">{{ currentPage + 1 }}</div>
+              <div class="pager-btn" (click)="nextPage()">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: PLANNING ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'planning'">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">📅</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ totalCourses }}</div><div class="kpi-lbl">Cours</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">🗓️</div><span class="kpi-delta up">↑</span></div><div class="kpi-val">{{ totalSchedules }}</div><div class="kpi-lbl">Séances planifiées</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ activeCoaches }}</div><div class="kpi-lbl">Coachs disponibles</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-purple">🏠</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ schedules.length }}</div><div class="kpi-lbl">Séances actives</div></div>
+        </div>
+
+        <!-- Sub-tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <div class="tab" [class.active]="planningTab === 'courses'" (click)="planningTab = 'courses'" style="cursor:pointer;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s" [style.background]="planningTab === 'courses' ? 'var(--accent)' : 'rgba(255,255,255,0.06)'" [style.color]="planningTab === 'courses' ? '#fff' : 'var(--muted)'">📚 Cours ({{ totalCourses }})</div>
+          <div class="tab" [class.active]="planningTab === 'schedules'" (click)="planningTab = 'schedules'" style="cursor:pointer;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s" [style.background]="planningTab === 'schedules' ? 'var(--accent)' : 'rgba(255,255,255,0.06)'" [style.color]="planningTab === 'schedules' ? '#fff' : 'var(--muted)'">🗓️ Séances ({{ totalSchedules }})</div>
+        </div>
+
+        <!-- TAB: COURS -->
+        @if (planningTab === 'courses') {
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title">Gestion des cours</div><div class="card-meta">{{ totalCourses }} cours enregistrés</div></div>
+              <button class="btn-add" (click)="openCourseModal()">＋ Ajouter cours</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nom</th><th>Description</th><th>Durée</th><th>Capacité</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody>
+                  @for (c of courses; track c.id) {
+                    <tr>
+                      <td style="font-weight:600">{{ c.name }}</td>
+                      <td style="color:var(--muted);font-size:12px">{{ c.description || '—' }}</td>
+                      <td>{{ c.durationMinutes }} min</td>
+                      <td>{{ c.capacity }} pers.</td>
+                      <td><span class="pill" [class.pill-green]="c.active" [class.pill-red]="!c.active">{{ c.active ? 'Actif' : 'Inactif' }}</span></td>
+                      <td style="display:flex;gap:10px">
+                        <span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editCourse(c)">✏️ Modifier</span>
+                        <span style="cursor:pointer;color:var(--red);font-size:13px" (click)="deleteCourse(c)">🗑️</span>
+                      </td>
+                    </tr>
+                  }
+                  @if (courses.length === 0) {
+                    <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Aucun cours trouvé</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- TAB: SÉANCES -->
+        @if (planningTab === 'schedules') {
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title">Séances planifiées</div><div class="card-meta">{{ totalSchedules }} séances</div></div>
+              <button class="btn-add" (click)="openScheduleModal()">＋ Ajouter séance</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Date</th><th>Heure</th><th>Cours</th><th>Coach</th><th>Salle</th><th>Capacité</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody>
+                  @for (s of schedules; track s.id) {
+                    <tr>
+                      <td>{{ formatDate(s.startTime) }}</td>
+                      <td>{{ formatTime(s.startTime) }} – {{ formatTime(s.endTime) }}</td>
+                      <td style="font-weight:600">{{ getCourseName(s.courseId) }}</td>
+                      <td>{{ getCoachName(s.coachId) }}</td>
+                      <td>{{ s.room || '—' }}</td>
+                      <td>{{ s.capacity || '—' }}</td>
+                      <td><span class="pill" [class.pill-green]="s.active && !isScheduleExpired(s.endTime)" [class.pill-red]="!s.active && !isScheduleExpired(s.endTime)" [class.pill-orange]="isScheduleExpired(s.endTime)">{{ getScheduleStatus(s) }}</span></td>
+                      <td style="display:flex;gap:10px">
+                        <span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editSchedule(s)">✏️</span>
+                        <span style="cursor:pointer;color:var(--red);font-size:13px" (click)="deleteSchedule(s)">🗑️</span>
+                      </td>
+                    </tr>
+                  }
+                  @if (schedules.length === 0) {
+                    <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Aucune séance planifiée</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ════════════════════ PAGE: COACHS ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'coachs'">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">🎯</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ totalCoaches }}</div><div class="kpi-lbl">Coachs actifs</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">📅</div><span class="kpi-delta up">↑</span></div><div class="kpi-val">42</div><div class="kpi-lbl">Cours cette semaine</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">⭐</div><span class="kpi-delta up">↑</span></div><div class="kpi-val">4.8</div><div class="kpi-lbl">Note moyenne</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-purple">💰</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">28k</div><div class="kpi-lbl">Masse salariale (MAD)</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Équipe de coachs</div><div class="card-meta">{{ totalCoaches }} coachs enregistrés</div></div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <input class="form-input" style="width:220px;padding:8px 12px;font-size:12px" placeholder="🔍 Rechercher un coach…" [(ngModel)]="coachSearch" (ngModelChange)="filterCoaches()">
+              <button class="btn-add" (click)="openCoachModal()">＋ Ajouter coach</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Coach</th><th>Téléphone</th><th>Certifications</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody>
+                @for (c of coaches; track c.id) {
+                  <tr>
+                    <td>
+                      <div class="av-row">
+                        <div class="av" style="background:linear-gradient(135deg,var(--accent),#ea580c)">{{ getCoachInitials(c) }}</div>
+                        <div class="av-info">
+                          <div class="av-name">{{ c.displayName }}</div>
+                          <div class="av-sub" *ngIf="c.bio">{{ c.bio }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ c.phone || '—' }}</td>
+                    <td>{{ c.certifications || '—' }}</td>
+                    <td><span class="pill" [class.pill-green]="c.active" [class.pill-red]="!c.active">{{ c.active ? 'Actif' : 'Inactif' }}</span></td>
+                    <td style="display:flex;gap:10px">
+                      <span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editCoach(c)">✏️ Modifier</span>
+                      <span style="cursor:pointer;color:var(--red);font-size:13px" (click)="deleteCoach(c)">🗑️ Supprimer</span>
+                    </td>
+                  </tr>
+                }
+                @if (coaches.length === 0) {
+                  <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Aucun coach trouvé</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: ABONNEMENTS ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'abonnements'">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">�</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ totalPlans }}</div><div class="kpi-lbl">Total plans</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta up">↑</span></div><div class="kpi-val">{{ activePlans }}</div><div class="kpi-lbl">Plans actifs</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-red">❌</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ totalPlans - activePlans }}</div><div class="kpi-lbl">Plans inactifs</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">📋</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">{{ plans.length }}</div><div class="kpi-lbl">Plans configurés</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Gestion des plans d'abonnement</div><div class="card-meta">{{ totalPlans }} plans enregistrés</div></div>
+            <button class="btn-add" (click)="openPlanModal()">＋ Ajouter plan</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nom</th><th>Durée</th><th>Prix</th><th>Cours inclus</th><th>Description</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody>
+                @for (p of plans; track p.id) {
+                  <tr>
+                    <td style="font-weight:600">{{ p.name }}</td>
+                    <td>{{ p.durationDays }} jours</td>
+                    <td style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)">{{ formatPrice(p.priceCents) }} <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted)">MAD</span></td>
+                    <td><span class="pill" [class.pill-green]="p.includesClasses" [class.pill-red]="!p.includesClasses">{{ p.includesClasses ? 'Oui' : 'Non' }}</span></td>
+                    <td style="color:var(--muted);font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.description || '—' }}</td>
+                    <td><span class="pill" [class.pill-green]="p.active" [class.pill-red]="!p.active">{{ p.active ? 'Actif' : 'Inactif' }}</span></td>
+                    <td style="display:flex;gap:10px">
+                      <span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editPlan(p)">✏️ Modifier</span>
+                      <span style="cursor:pointer;color:var(--red);font-size:13px" (click)="deletePlan(p)">🗑️</span>
+                    </td>
+                  </tr>
+                }
+                @if (plans.length === 0) {
+                  <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Aucun plan trouvé</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Plans cards preview -->
+        @if (plans.length > 0) {
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px">
+            @for (p of plans; track p.id) {
+              <div class="card" [style.opacity]="p.active ? 1 : 0.5" style="position:relative;overflow:hidden">
+                @if (!p.active) {
+                  <div style="position:absolute;top:10px;right:10px"><span class="pill pill-red">Inactif</span></div>
+                }
+                <div style="padding:4px 0">
+                  <div style="font-size:16px;font-weight:700;margin-bottom:4px">{{ p.name }}</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--accent)">{{ formatPrice(p.priceCents) }} <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:var(--muted)">MAD</span></div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:4px">{{ p.durationDays }} jours</div>
+                  @if (p.description) {
+                    <div style="font-size:13px;color:var(--muted2);margin-top:10px;line-height:1.5">{{ p.description }}</div>
+                  }
+                  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                    <span class="pill" [class.pill-green]="p.includesClasses" [class.pill-red]="!p.includesClasses">{{ p.includesClasses ? '✅ Cours inclus' : '❌ Sans cours' }}</span>
+                  </div>
+                  <div style="margin-top:14px;display:flex;gap:8px">
+                    <button class="btn-add" style="font-size:12px;padding:6px 14px" (click)="editPlan(p)">✏️ Modifier</button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ════════════════════ PAGE: ÉQUIPEMENTS ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'equipements'">
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta up">+2</span></div><div class="kpi-val">182</div><div class="kpi-lbl">En bon état</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-yellow">🔧</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">8</div><div class="kpi-lbl">En maintenance</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-red">❌</div><span class="kpi-delta down">↑ +3</span></div><div class="kpi-val">5</div><div class="kpi-lbl">Hors service</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">📦</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">195</div><div class="kpi-lbl">Total équipements</div></div>
+        </div>
+        @if (showEquipAlert) {
+          <div class="alert alert-err"><span class="alert-icon">🚨</span><span class="alert-txt"><strong>Rameurs #4, #5, #6</strong> — Hors service, intervention urgente requise avant lundi matin</span><span class="alert-close" (click)="showEquipAlert = false">✕</span></div>
+        }
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">État des équipements</div><div class="card-meta">195 équipements · dernière vérif. 07/03/2026</div></div><button class="btn-add" style="font-size:12px;padding:8px 14px;">＋ Signaler panne</button></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;">
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Tapis de course</div><div class="equip-count">16/18 disponibles</div></div><div class="equip-icon">🏃</div></div><div class="prog-bar"><div class="prog-fill" style="width:89%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>Dernier entretien : 01/03</span><span style="color:var(--green);font-weight:700">Bon état ✓</span></div></div>
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Vélos elliptiques</div><div class="equip-count">7/10 disponibles</div></div><div class="equip-icon">🚴</div></div><div class="prog-bar"><div class="prog-fill" style="width:70%;background:linear-gradient(90deg,var(--blue),#93c5fd)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>3 en maintenance</span><span style="color:var(--blue);font-weight:700">Normal</span></div></div>
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Machines musculation</div><div class="equip-count">20/25 disponibles</div></div><div class="equip-icon">🏋️</div></div><div class="prog-bar"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>5 en révision</span><span style="color:var(--accent);font-weight:700">Maintenance</span></div></div>
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Rameurs</div><div class="equip-count">3/6 disponibles</div></div><div class="equip-icon">🚣</div></div><div class="prog-bar"><div class="prog-fill" style="width:50%;background:linear-gradient(90deg,var(--red),#fca5a5)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>3 hors service</span><span style="color:var(--red);font-weight:700">⚠️ URGENT</span></div></div>
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Haltères & barres</div><div class="equip-count">Complet</div></div><div class="equip-icon">🏋️‍♂️</div></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>Dernier entretien : 05/03</span><span style="color:var(--green);font-weight:700">Excellent ✓</span></div></div>
+            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Équipements boxe</div><div class="equip-count">8/10 disponibles</div></div><div class="equip-icon">🥊</div></div><div class="prog-bar"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--purple),#d8b4fe)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>2 en réparation</span><span style="color:var(--purple);font-weight:700">Bon état</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: FINANCES ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'finances'">
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">💵</div></div><div class="kpi-val">{{ totalPayments }}</div><div class="kpi-lbl">Total paiements</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">📊</div></div><div class="kpi-val">{{ formatPrice(totalRevenue) }}</div><div class="kpi-lbl">Revenus totaux (MAD)</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">📋</div></div><div class="kpi-val">{{ totalSubscriptions }}</div><div class="kpi-lbl">Total abonnements</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div></div><div class="kpi-val">{{ activeSubscriptions }}</div><div class="kpi-lbl">Abonnements actifs</div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <div class="tab" [class.active]="financesTab === 'payments'" (click)="financesTab = 'payments'" style="cursor:pointer;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s" [style.background]="financesTab === 'payments' ? 'var(--accent)' : 'rgba(255,255,255,0.06)'" [style.color]="financesTab === 'payments' ? '#fff' : 'var(--muted)'">💳 Paiements ({{ totalPayments }})</div>
+          <div class="tab" [class.active]="financesTab === 'subscriptions'" (click)="financesTab = 'subscriptions'" style="cursor:pointer;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;transition:all .2s" [style.background]="financesTab === 'subscriptions' ? 'var(--accent)' : 'rgba(255,255,255,0.06)'" [style.color]="financesTab === 'subscriptions' ? '#fff' : 'var(--muted)'">📋 Abonnements ({{ totalSubscriptions }})</div>
+        </div>
+
+        <!-- Payments Table -->
+        @if (financesTab === 'payments') {
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title">Historique des paiements</div><div class="card-meta">Tous les paiements enregistrés</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Membre</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Référence</th><th>Date</th></tr></thead>
+                <tbody>
+                  @for (p of allPayments; track p.id) {
+                    <tr>
+                      <td>#{{ p.id }}</td>
+                      <td>{{ getMemberNameById(p.memberId) }}</td>
+                      <td style="font-weight:600;color:var(--green)">{{ formatPrice(p.amountCents) }} MAD</td>
+                      <td>
+                        <span class="pill" [class.pill-blue]="p.method === 'PAYPAL'" [class.pill-green]="p.method === 'CASH'" [class.pill-orange]="p.method === 'CARD'" [class.pill-gray]="p.method === 'TRANSFER'">
+                          {{ p.method }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="pill" [class.pill-green]="p.status === 'COMPLETED'" [class.pill-orange]="p.status === 'PENDING'" [class.pill-red]="p.status === 'FAILED'">
+                          {{ p.status }}
+                        </span>
+                      </td>
+                      <td style="font-size:11px;color:var(--muted)">{{ p.reference || '—' }}</td>
+                      <td style="font-size:12px">{{ formatPaymentDate(p.paymentDate) }}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucun paiement enregistré</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- Subscriptions Table -->
+        @if (financesTab === 'subscriptions') {
+          <div class="card">
+            <div class="card-head">
+              <div><div class="card-title">Tous les abonnements</div><div class="card-meta">Historique complet des souscriptions</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Membre</th><th>Plan</th><th>Début</th><th>Fin</th><th>Statut</th><th>Renouvellement auto</th></tr></thead>
+                <tbody>
+                  @for (s of allSubscriptions; track s.id) {
+                    <tr>
+                      <td>#{{ s.id }}</td>
+                      <td>{{ getMemberNameById(s.memberId) }}</td>
+                      <td>{{ getPlanNameById(s.planId) }}</td>
+                      <td style="font-size:12px">{{ formatSubDate(s.startDate) }}</td>
+                      <td style="font-size:12px">{{ formatSubDate(s.endDate) }}</td>
+                      <td>
+                        <span class="pill" [class.pill-green]="s.status === 'ACTIVE'" [class.pill-orange]="s.status === 'EXPIRED'" [class.pill-red]="s.status === 'CANCELLED'" [class.pill-gray]="s.status === 'SUSPENDED'">
+                          {{ s.status }}
+                        </span>
+                      </td>
+                      <td style="text-align:center">{{ s.autoRenew ? '✅' : '—' }}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucun abonnement enregistré</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ════════════════════ PAGE: RAPPORTS ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'rapports'">
+        @if (showReportAlert) {
+          <div class="alert alert-ok"><span class="alert-icon">📊</span><span class="alert-txt">Rapport mensuel de <strong>février 2026</strong> disponible — record de fréquentation atteint</span><span class="alert-close" (click)="showReportAlert = false">✕</span></div>
+        }
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><div><div class="card-title">Performance mensuelle</div><div class="card-meta">Comparaison jan – mars 2026</div></div></div>
+            <div style="margin-top:4px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:10px"><span>Indicateur</span><span>Jan</span><span>Fév</span><span>Mars (en cours)</span></div>
+              <div class="metric-row"><span class="metric-label">👥 Membres</span><span style="font-size:13px">308</span><span style="font-size:13px">328</span><span style="font-size:13px;color:var(--green);font-weight:700">342 ↑</span></div>
+              <div class="metric-row"><span class="metric-label">💰 Revenus</span><span style="font-size:13px">16.2k</span><span style="font-size:13px">16.5k</span><span style="font-size:13px;color:var(--green);font-weight:700">18.4k ↑</span></div>
+              <div class="metric-row"><span class="metric-label">🏃 Fréq./jour</span><span style="font-size:13px">48</span><span style="font-size:13px">52</span><span style="font-size:13px;color:var(--green);font-weight:700">61 ↑</span></div>
+              <div class="metric-row"><span class="metric-label">🔄 Taux renouv.</span><span style="font-size:13px">78%</span><span style="font-size:13px">80%</span><span style="font-size:13px;color:var(--green);font-weight:700">82% ↑</span></div>
+              <div class="metric-row"><span class="metric-label">⭐ Satisfaction</span><span style="font-size:13px">4.6</span><span style="font-size:13px">4.7</span><span style="font-size:13px;color:var(--green);font-weight:700">4.8 ↑</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><div class="card-title">Rapports disponibles</div><div class="card-meta">Télécharger les bilans</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+              <div class="report-row"><span style="font-size:22px">📄</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan mars 2026 (partiel)</div><div style="font-size:11px;color:var(--muted)">Mis à jour ce matin</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
+              <div class="report-row"><span style="font-size:22px">📊</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan complet février 2026</div><div style="font-size:11px;color:var(--muted)">Record fréquentation mensuelle</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
+              <div class="report-row"><span style="font-size:22px">📈</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan Q1 2026</div><div style="font-size:11px;color:var(--muted)">Jan + Fév + Mars (en cours)</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 Excel</span></div>
+              <div class="report-row"><span style="font-size:22px">🗓️</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Rapport annuel 2025</div><div style="font-size:11px;color:var(--muted)">Bilan complet — 12 mois</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: NOTIFICATIONS ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'notifications'">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">Centre de notifications</div><div class="card-meta">5 non lues</div></div><span class="card-action">Tout marquer lu</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="notif-item" style="background:rgba(249,115,22,0.05);border-color:rgba(249,115,22,0.18)"><span style="font-size:22px;flex-shrink:0">🚨</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Maintenance urgente — Rameurs</div><div style="font-size:13px;color:var(--muted2)">Les rameurs #4, #5 et #6 sont hors service. Intervention requise avant lundi.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 45 min</div></div><span class="pill pill-red" style="height:fit-content">Urgent</span></div>
+            <div class="notif-item" style="background:rgba(234,179,8,0.05);border-color:rgba(234,179,8,0.18)"><span style="font-size:22px;flex-shrink:0">⏰</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">24 abonnements expirent bientôt</div><div style="font-size:13px;color:var(--muted2)">Les abonnements de 24 membres arrivent à expiration dans les 7 prochains jours.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 1h</div></div><span class="pill pill-orange" style="height:fit-content">Attention</span></div>
+            <div class="notif-item" style="background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.15)"><span style="font-size:22px;flex-shrink:0">🎉</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Nouvel objectif mensuel atteint</div><div style="font-size:13px;color:var(--muted2)">Le taux de fréquentation de mars dépasse déjà celui de février — félicitations à l'équipe !</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 2h</div></div><span class="pill pill-green" style="height:fit-content">Info</span></div>
+            <div class="notif-item"><span style="font-size:22px;flex-shrink:0">💰</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Paiement reçu · Ahmed Harrak</div><div style="font-size:13px;color:var(--muted2)">Renouvellement Premium confirmé — 399 MAD encaissé.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 3h</div></div><span class="pill pill-green" style="height:fit-content">OK</span></div>
+            <div class="notif-item"><span style="font-size:22px;flex-shrink:0">👤</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Nouveau membre inscrit</div><div style="font-size:13px;color:var(--muted2)">Youssef Benali s'est inscrit au plan Standard — accueil à prévoir.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 27 min</div></div><span class="pill pill-blue" style="height:fit-content">Nouveau</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════ PAGE: PARAMÈTRES ════════════════════ -->
+      <div class="page" [class.active]="activePage === 'parametres'">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><div><div class="card-title">Informations de la salle</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="form-group"><label class="form-label">Nom de la salle</label><input class="form-input" value="FitZone Pro"></div>
+              <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" value="Av. Mohammed V, Kénitra 14000"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" value="+212 537 XX XX XX"></div>
+                <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="contact&#64;fitzone.ma"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Ouverture</label><input class="form-input" value="06:00"></div>
+                <div class="form-group"><label class="form-label">Fermeture</label><input class="form-input" value="00:00"></div>
+              </div>
+              <button class="btn-submit">💾 Sauvegarder les modifications</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><div class="card-title">Paramètres notifications</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Rappels abonnement</div><div style="font-size:11px;color:var(--muted)">Envoyer 7 jours avant expiration</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Alertes maintenance</div><div style="font-size:11px;color:var(--muted)">Notifications pannes équipements</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Rapports hebdomadaires</div><div style="font-size:11px;color:var(--muted)">Bilan automatique chaque lundi</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
+              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Alertes affluence max</div><div style="font-size:11px;color:var(--muted)">Quand la salle est à 90% de capacité</div></div><div class="toggle"><div class="toggle-knob"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ════════════════════════════ MODAL: NOUVEAU MEMBRE ════════════════════════════ -->
+@if (showMemberModal) {
+  <div class="modal-over open" (click)="onModalOverlayClick($event)" (keydown.escape)="closeMemberModal()">
+    <div class="modal-box">
+      <div class="modal-stripe"></div>
+      <button class="modal-close-btn" (click)="closeMemberModal()">✕</button>
+      <div class="modal-hd">
+        <div class="modal-ico">👤</div>
+        <div class="modal-title">Nouveau membre</div>
+        <div class="modal-sub">Enregistrer un nouveau membre</div>
+      </div>
+      <div class="modal-bd">
+        @if (modalError) {
+          <div class="alert alert-err" style="margin-bottom:14px"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ modalError }}</span></div>
+        }
+        @if (modalSuccess) {
+          <div class="alert alert-ok" style="margin-bottom:14px"><span class="alert-icon">✅</span><span class="alert-txt">{{ modalSuccess }}</span></div>
+        }
+        <form (ngSubmit)="submitNewMember()">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" placeholder="Ahmed" name="firstName" [(ngModel)]="newMember.firstName" required></div>
+            <div class="form-group"><label class="form-label">Nom</label><input class="form-input" placeholder="Harrak" name="lastName" [(ngModel)]="newMember.lastName" required></div>
+          </div>
+          <div class="form-group"><label class="form-label">Nom d'utilisateur</label><input class="form-input" placeholder="ahmed.harrak" name="username" [(ngModel)]="newMember.username" required></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" placeholder="+212 6XX XXX XXX" name="phone" [(ngModel)]="newMember.phone"></div>
+            <div class="form-group"><label class="form-label">Date de naissance</label><input class="form-input" type="date" name="birthDate" [(ngModel)]="newMember.birthDate"></div>
+          </div>
+          <button class="btn-submit" type="submit" [disabled]="modalLoading">{{ modalLoading ? 'Enregistrement...' : '✅ Enregistrer le membre' }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════════════════════════════ MODAL: NOUVEAU COACH ════════════════════════════ -->
+@if (showCoachModal) {
+  <div class="modal-over open" (click)="onCoachModalOverlayClick($event)" (keydown.escape)="closeCoachModal()">
+    <div class="modal-box">
+      <div class="modal-stripe"></div>
+      <button class="modal-close-btn" (click)="closeCoachModal()">✕</button>
+      <div class="modal-hd">
+        <div class="modal-ico">🎯</div>
+        <div class="modal-title">{{ editingCoachId ? 'Modifier le coach' : 'Nouveau coach' }}</div>
+        <div class="modal-sub">{{ editingCoachId ? 'Modifier les informations du coach' : 'Enregistrer un nouveau coach' }}</div>
+      </div>
+      <div class="modal-bd">
+        @if (coachModalError) {
+          <div class="alert alert-err" style="margin-bottom:14px"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ coachModalError }}</span></div>
+        }
+        @if (coachModalSuccess) {
+          <div class="alert alert-ok" style="margin-bottom:14px"><span class="alert-icon">✅</span><span class="alert-txt">{{ coachModalSuccess }}</span></div>
+        }
+        <form (ngSubmit)="submitNewCoach()">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nom d'affichage</label><input class="form-input" placeholder="Hassan Rami" name="coachDisplayName" [(ngModel)]="newCoach.displayName" required></div>
+            @if (!editingCoachId) {
+              <div class="form-group"><label class="form-label">Nom d'utilisateur</label><input class="form-input" placeholder="hassan.rami" name="coachUsername" [(ngModel)]="newCoach.username" required></div>
+            }
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" placeholder="+212 6XX XXX XXX" name="coachPhone" [(ngModel)]="newCoach.phone"></div>
+            <div class="form-group"><label class="form-label">Certifications</label><input class="form-input" placeholder="CrossFit L2, NASM" name="coachCertifications" [(ngModel)]="newCoach.certifications"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Bio</label><textarea class="form-input" style="min-height:70px;resize:vertical" placeholder="Spécialités, expérience…" name="coachBio" [(ngModel)]="newCoach.bio"></textarea></div>
+          @if (editingCoachId) {
+            <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-top:4px">
+              <label class="form-label" style="margin:0">Statut</label>
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer" (click)="newCoach.active = !newCoach.active">
+                <div style="width:40px;height:22px;border-radius:11px;transition:background .2s" [style.background]="newCoach.active ? 'var(--accent)' : 'rgba(255,255,255,0.1)'">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#fff;margin-top:2px;transition:margin-left .2s" [style.margin-left]="newCoach.active ? '20px' : '2px'"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600" [style.color]="newCoach.active ? 'var(--green)' : 'var(--red)'">{{ newCoach.active ? 'Actif' : 'Inactif' }}</span>
+              </div>
+            </div>
+          }
+          <button class="btn-submit" type="submit" [disabled]="coachModalLoading">{{ coachModalLoading ? 'Enregistrement...' : (editingCoachId ? '✅ Modifier le coach' : '✅ Enregistrer le coach') }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════════════════════════════ MODAL: COURS ════════════════════════════ -->
+@if (showCourseModal) {
+  <div class="modal-over open" (click)="onCourseModalOverlay($event)" (keydown.escape)="closeCourseModal()">
+    <div class="modal-box">
+      <div class="modal-stripe"></div>
+      <button class="modal-close-btn" (click)="closeCourseModal()">✕</button>
+      <div class="modal-hd">
+        <div class="modal-ico">📚</div>
+        <div class="modal-title">{{ editingCourseId ? 'Modifier le cours' : 'Nouveau cours' }}</div>
+        <div class="modal-sub">{{ editingCourseId ? 'Modifier les informations du cours' : 'Enregistrer un nouveau cours' }}</div>
+      </div>
+      <div class="modal-bd">
+        @if (courseModalError) {
+          <div class="alert alert-err" style="margin-bottom:14px"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ courseModalError }}</span></div>
+        }
+        @if (courseModalSuccess) {
+          <div class="alert alert-ok" style="margin-bottom:14px"><span class="alert-icon">✅</span><span class="alert-txt">{{ courseModalSuccess }}</span></div>
+        }
+        <form (ngSubmit)="submitCourse()">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nom du cours</label><input class="form-input" placeholder="Ex: CrossFit, Yoga…" name="courseName" [(ngModel)]="newCourse.name" required></div>
+            <div class="form-group"><label class="form-label">Durée (minutes)</label><input class="form-input" type="number" placeholder="60" name="courseDuration" [(ngModel)]="newCourse.durationMinutes"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" style="min-height:70px;resize:vertical" placeholder="Description du cours…" name="courseDesc" [(ngModel)]="newCourse.description"></textarea></div>
+          <div class="form-group">
+            <label class="form-label">Photo</label>
+            <div class="file-upload-zone" (click)="courseFileInput.click()" (dragover)="$event.preventDefault()" (drop)="$event.preventDefault(); onCourseFileDrop($event)">
+              @if (coursePhotoUploading) {
+                <div style="color:var(--accent)">⏳ Upload en cours…</div>
+              } @else if (newCourse.photoUrl) {
+                <img [src]="getCoursePhotoFullUrl(newCourse.photoUrl)" alt="Aperçu" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px" />
+                <div style="margin-top:8px;font-size:12px;color:var(--muted)">Cliquer pour changer</div>
+              } @else {
+                <div style="font-size:28px">📷</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:6px">Cliquer ou glisser une image</div>
+                <div style="font-size:11px;color:var(--muted)">JPG, PNG, WEBP, GIF — max 5 Mo</div>
+              }
+            </div>
+            <input #courseFileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" (change)="onCourseFileSelected($event)" />
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Capacité</label><input class="form-input" type="number" placeholder="20" name="courseCapacity" [(ngModel)]="newCourse.capacity"></div>
+          </div>
+          @if (editingCourseId) {
+            <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-top:4px">
+              <label class="form-label" style="margin:0">Statut</label>
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer" (click)="newCourse.active = !newCourse.active">
+                <div style="width:40px;height:22px;border-radius:11px;transition:background .2s" [style.background]="newCourse.active ? 'var(--accent)' : 'rgba(255,255,255,0.1)'">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#fff;margin-top:2px;transition:margin-left .2s" [style.margin-left]="newCourse.active ? '20px' : '2px'"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600" [style.color]="newCourse.active ? 'var(--green)' : 'var(--red)'">{{ newCourse.active ? 'Actif' : 'Inactif' }}</span>
+              </div>
+            </div>
+          }
+          <button class="btn-submit" type="submit" [disabled]="courseModalLoading">{{ courseModalLoading ? 'Enregistrement...' : (editingCourseId ? '✅ Modifier le cours' : '✅ Enregistrer le cours') }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════════════════════════════ MODAL: SÉANCE ════════════════════════════ -->
+@if (showScheduleModal) {
+  <div class="modal-over open" (click)="onScheduleModalOverlay($event)" (keydown.escape)="closeScheduleModal()">
+    <div class="modal-box">
+      <div class="modal-stripe"></div>
+      <button class="modal-close-btn" (click)="closeScheduleModal()">✕</button>
+      <div class="modal-hd">
+        <div class="modal-ico">🗓️</div>
+        <div class="modal-title">{{ editingScheduleId ? 'Modifier la séance' : 'Nouvelle séance' }}</div>
+        <div class="modal-sub">{{ editingScheduleId ? 'Modifier les informations de la séance' : 'Planifier une nouvelle séance' }}</div>
+      </div>
+      <div class="modal-bd">
+        @if (scheduleModalError) {
+          <div class="alert alert-err" style="margin-bottom:14px"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ scheduleModalError }}</span></div>
+        }
+        @if (scheduleModalSuccess) {
+          <div class="alert alert-ok" style="margin-bottom:14px"><span class="alert-icon">✅</span><span class="alert-txt">{{ scheduleModalSuccess }}</span></div>
+        }
+        <form (ngSubmit)="submitSchedule()">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Cours</label><select class="form-input" name="schedCourse" [(ngModel)]="newSchedule.courseId" required>@for (c of courses; track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }</select></div>
+            <div class="form-group"><label class="form-label">Coach</label><select class="form-input" name="schedCoach" [(ngModel)]="newSchedule.coachId"><option [ngValue]="null">— Non assigné —</option>@for (ch of allCoaches; track ch.id) { <option [ngValue]="ch.id">{{ ch.displayName }}</option> }</select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Heure début</label><input class="form-input" type="datetime-local" name="schedStart" [(ngModel)]="newSchedule.startTime" required></div>
+            <div class="form-group"><label class="form-label">Heure fin</label><input class="form-input" type="datetime-local" name="schedEnd" [(ngModel)]="newSchedule.endTime" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Salle</label><input class="form-input" placeholder="Ex: Salle A" name="schedRoom" [(ngModel)]="newSchedule.room"></div>
+            <div class="form-group"><label class="form-label">Capacité</label><input class="form-input" type="number" placeholder="20" name="schedCapacity" [(ngModel)]="newSchedule.capacity"></div>
+          </div>
+          @if (editingScheduleId) {
+            <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-top:4px">
+              <label class="form-label" style="margin:0">Statut</label>
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer" (click)="newSchedule.active = !newSchedule.active">
+                <div style="width:40px;height:22px;border-radius:11px;transition:background .2s" [style.background]="newSchedule.active ? 'var(--accent)' : 'rgba(255,255,255,0.1)'">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#fff;margin-top:2px;transition:margin-left .2s" [style.margin-left]="newSchedule.active ? '20px' : '2px'"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600" [style.color]="newSchedule.active ? 'var(--green)' : 'var(--red)'">{{ newSchedule.active ? 'Actif' : 'Inactif' }}</span>
+              </div>
+            </div>
+          }
+          <button class="btn-submit" type="submit" [disabled]="scheduleModalLoading">{{ scheduleModalLoading ? 'Enregistrement...' : (editingScheduleId ? '✅ Modifier la séance' : '✅ Planifier la séance') }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════════════════════════════ MODAL: PLAN D'ABONNEMENT ════════════════════════════ -->
+@if (showPlanModal) {
+  <div class="modal-over open" (click)="onPlanModalOverlay($event)" (keydown.escape)="closePlanModal()">
+    <div class="modal-box">
+      <div class="modal-stripe"></div>
+      <button class="modal-close-btn" (click)="closePlanModal()">✕</button>
+      <div class="modal-hd">
+        <div class="modal-ico">💳</div>
+        <div class="modal-title">{{ editingPlanId ? 'Modifier le plan' : 'Nouveau plan' }}</div>
+        <div class="modal-sub">{{ editingPlanId ? 'Modifier les informations du plan' : 'Créer un nouveau plan d\'abonnement' }}</div>
+      </div>
+      <div class="modal-bd">
+        @if (planModalError) {
+          <div class="alert alert-err" style="margin-bottom:14px"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ planModalError }}</span></div>
+        }
+        @if (planModalSuccess) {
+          <div class="alert alert-ok" style="margin-bottom:14px"><span class="alert-icon">✅</span><span class="alert-txt">{{ planModalSuccess }}</span></div>
+        }
+        <form (ngSubmit)="submitPlan()">
+          <div class="form-group"><label class="form-label">Nom du plan</label><input class="form-input" placeholder="Ex: Premium, Standard…" name="planName" [(ngModel)]="newPlan.name" required></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Durée (jours)</label><input class="form-input" type="number" placeholder="30" name="planDuration" [(ngModel)]="newPlan.durationDays" min="1" required></div>
+            <div class="form-group"><label class="form-label">Prix (centimes MAD)</label><input class="form-input" type="number" placeholder="39900" name="planPrice" [(ngModel)]="newPlan.priceCents" min="0" required></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" style="min-height:70px;resize:vertical" placeholder="Accès illimité, coaching personnalisé…" name="planDesc" [(ngModel)]="newPlan.description"></textarea></div>
+          <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-top:4px">
+            <label class="form-label" style="margin:0">Cours inclus</label>
+            <div style="display:flex;align-items:center;gap:8px;cursor:pointer" (click)="newPlan.includesClasses = !newPlan.includesClasses">
+              <div style="width:40px;height:22px;border-radius:11px;transition:background .2s" [style.background]="newPlan.includesClasses ? 'var(--accent)' : 'rgba(255,255,255,0.1)'">
+                <div style="width:18px;height:18px;border-radius:50%;background:#fff;margin-top:2px;transition:margin-left .2s" [style.margin-left]="newPlan.includesClasses ? '20px' : '2px'"></div>
+              </div>
+              <span style="font-size:13px;font-weight:600" [style.color]="newPlan.includesClasses ? 'var(--green)' : 'var(--muted)'">{{ newPlan.includesClasses ? 'Oui' : 'Non' }}</span>
+            </div>
+          </div>
+          @if (editingPlanId) {
+            <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-top:4px">
+              <label class="form-label" style="margin:0">Statut</label>
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer" (click)="newPlan.active = !newPlan.active">
+                <div style="width:40px;height:22px;border-radius:11px;transition:background .2s" [style.background]="newPlan.active ? 'var(--accent)' : 'rgba(255,255,255,0.1)'">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#fff;margin-top:2px;transition:margin-left .2s" [style.margin-left]="newPlan.active ? '20px' : '2px'"></div>
+                </div>
+                <span style="font-size:13px;font-weight:600" [style.color]="newPlan.active ? 'var(--green)' : 'var(--red)'">{{ newPlan.active ? 'Actif' : 'Inactif' }}</span>
+              </div>
+            </div>
+          }
+          <button class="btn-submit" type="submit" [disabled]="planModalLoading">{{ planModalLoading ? 'Enregistrement...' : (editingPlanId ? '✅ Modifier le plan' : '✅ Créer le plan') }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+}
