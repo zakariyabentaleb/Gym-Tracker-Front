@@ -1,0 +1,122 @@
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <h1>Mes <span>Inscriptions</span></h1>
+    <p>Suivez vos réservations aux séances et gérez vos inscriptions.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-chip">📋 <strong>{{ enriched.length }}</strong> Total</div>
+    <div class="stat-chip">✅ <strong>{{ confirmedCount }}</strong> Confirmées</div>
+    <div class="stat-chip">⏳ <strong>{{ waitingCount }}</strong> En attente</div>
+    <div class="stat-chip">⌛ <strong>{{ expiredCount }}</strong> Expirées</div>
+    <div class="stat-chip">❌ <strong>{{ cancelledCount }}</strong> Annulées</div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-bar">
+    <button class="filter-btn" [class.active]="activeFilter === 'all'" (click)="activeFilter = 'all'">Toutes</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'confirmed'" (click)="activeFilter = 'confirmed'">✅ Confirmées</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'waiting'" (click)="activeFilter = 'waiting'">⏳ En attente</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'cancelled'" (click)="activeFilter = 'cancelled'">❌ Annulées</button>
+  </div>
+
+  <!-- MESSAGE -->
+  @if (message) {
+    <div class="msg-alert" [class.msg-success]="messageType === 'success'" [class.msg-error]="messageType === 'error'">
+      {{ message }}
+    </div>
+  }
+
+  <!-- LOADING -->
+  @if (loading) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement de vos inscriptions…</p>
+    </div>
+  }
+
+  <!-- EMPTY -->
+  @if (!loading && filtered.length === 0) {
+    <div class="empty-state">
+      <div class="empty-ico">📭</div>
+      <h3>Aucune inscription</h3>
+      <p>Vous n'avez pas encore de réservation. Parcourez nos programmes et trouvez votre séance !</p>
+      <a class="btn-browse" routerLink="/programmes">Explorer les programmes →</a>
+    </div>
+  }
+
+  <!-- BOOKINGS LIST -->
+  @if (!loading && filtered.length > 0) {
+    <div class="bookings-list">
+      @for (item of filtered; track item.booking.id ?? item.booking.scheduleId) {
+        <div class="booking-card" [class.card-confirmed]="item.booking.status === 'CONFIRMED' && !isScheduleExpired(item)" [class.card-waiting]="item.booking.status === 'WAITING' && !isScheduleExpired(item)" [class.card-cancelled]="item.booking.status === 'CANCELLED'" [class.card-expired]="isScheduleExpired(item) && item.booking.status !== 'CANCELLED'">
+          
+          <div class="card-stripe"></div>
+
+          <div class="card-body">
+            <!-- Left: course info -->
+            <div class="card-main">
+              @if (item.course?.photoUrl) {
+                <div class="card-thumb">
+                  <img [src]="getPhotoUrl(item.course!.photoUrl)" [alt]="item.course!.name" />
+                </div>
+              }
+              <div class="card-info">
+                <div class="card-course-name">
+                  @if (item.course) {
+                    <a [routerLink]="['/programmes', item.course.id]">{{ item.course.name }}</a>
+                  } @else {
+                    Cours #{{ item.schedule?.courseId || '?' }}
+                  }
+                </div>
+                @if (item.schedule) {
+                  <div class="card-schedule">
+                    <span>📅 {{ formatDate(item.schedule.startTime) }}</span>
+                    <span>🕐 {{ formatTime(item.schedule.startTime) }} – {{ formatTime(item.schedule.endTime) }}</span>
+                  </div>
+                  <div class="card-details">
+                    <span class="detail-chip">🎯 {{ item.coachName }}</span>
+                    @if (item.schedule.room) {
+                      <span class="detail-chip">🏠 {{ item.schedule.room }}</span>
+                    }
+                    @if (item.schedule.capacity) {
+                      <span class="detail-chip">👥 {{ item.schedule.capacity }} places</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Right: status + actions -->
+            <div class="card-right">
+              <div class="status-badge" [class.status-confirmed]="item.booking.status === 'CONFIRMED' && !isScheduleExpired(item)" [class.status-waiting]="item.booking.status === 'WAITING' && !isScheduleExpired(item)" [class.status-cancelled]="item.booking.status === 'CANCELLED'" [class.status-expired]="isScheduleExpired(item) && item.booking.status !== 'CANCELLED'">
+                {{ getDisplayStatus(item) }}
+              </div>
+
+              @if (item.booking.createdAt) {
+                <div class="card-date">Inscrit le {{ formatDate(item.booking.createdAt) }}</div>
+              }
+
+              @if ((item.booking.status === 'CONFIRMED' || item.booking.status === 'WAITING') && !isScheduleExpired(item)) {
+                <button class="btn-cancel" (click)="cancelBooking(item.booking.id)" [disabled]="cancellingId === item.booking.id">
+                  @if (cancellingId === item.booking.id) {
+                    <span class="btn-spinner"></span>
+                  } @else {
+                    Annuler
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
