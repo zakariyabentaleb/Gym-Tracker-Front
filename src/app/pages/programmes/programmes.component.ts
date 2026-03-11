@@ -29,6 +29,11 @@ export class ProgrammesComponent implements OnInit {
   filteredCourses: CourseResponse[] = [];
   filteredSchedules: CourseScheduleResponse[] = [];
 
+  // pagination
+  coursePage = 1;
+  schedulePage = 1;
+  pageSize = 6;
+
   // search
   searchQuery = '';
 
@@ -99,6 +104,42 @@ export class ProgrammesComponent implements OnInit {
 
     this.filteredCourses = fc;
     this.filteredSchedules = fs;
+    this.coursePage = 1;
+    this.schedulePage = 1;
+  }
+
+  get pagedCourses(): CourseResponse[] {
+    const start = (this.coursePage - 1) * this.pageSize;
+    return this.filteredCourses.slice(start, start + this.pageSize);
+  }
+
+  get totalCoursePages(): number {
+    return Math.ceil(this.filteredCourses.length / this.pageSize) || 1;
+  }
+
+  get pagedSchedules(): CourseScheduleResponse[] {
+    const start = (this.schedulePage - 1) * this.pageSize;
+    return this.filteredSchedules.slice(start, start + this.pageSize);
+  }
+
+  get totalSchedulePages(): number {
+    return Math.ceil(this.filteredSchedules.length / this.pageSize) || 1;
+  }
+
+  getCoursePages(): number[] {
+    return Array.from({ length: this.totalCoursePages }, (_, i) => i + 1);
+  }
+
+  getSchedulePages(): number[] {
+    return Array.from({ length: this.totalSchedulePages }, (_, i) => i + 1);
+  }
+
+  goToCoursePage(p: number): void {
+    if (p >= 1 && p <= this.totalCoursePages) this.coursePage = p;
+  }
+
+  goToSchedulePage(p: number): void {
+    if (p >= 1 && p <= this.totalSchedulePages) this.schedulePage = p;
   }
 
   setDuration(val: 'all' | 'short' | 'medium' | 'long'): void {
