@@ -1,0 +1,59 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="profile-form">
+
+  <div class="form-grid">
+    <!-- First Name -->
+    <div class="field">
+      <label class="field-label">👤 Prénom</label>
+      <div class="field-input-wrap" [class.field-error]="form.get('firstName')?.invalid && form.get('firstName')?.touched">
+        <input type="text" formControlName="firstName" placeholder="Votre prénom" class="field-input" />
+      </div>
+      @if (form.get('firstName')?.touched && form.get('firstName')?.hasError('required')) {
+        <span class="field-hint">Le prénom est requis</span>
+      }
+    </div>
+
+    <!-- Last Name -->
+    <div class="field">
+      <label class="field-label">👤 Nom</label>
+      <div class="field-input-wrap" [class.field-error]="form.get('lastName')?.invalid && form.get('lastName')?.touched">
+        <input type="text" formControlName="lastName" placeholder="Votre nom" class="field-input" />
+      </div>
+      @if (form.get('lastName')?.touched && form.get('lastName')?.hasError('required')) {
+        <span class="field-hint">Le nom est requis</span>
+      }
+    </div>
+
+    <!-- Phone -->
+    <div class="field">
+      <label class="field-label">📱 Téléphone</label>
+      <div class="field-input-wrap">
+        <input type="tel" formControlName="phone" placeholder="+212 6XX XXX XXX" class="field-input" />
+      </div>
+    </div>
+
+    <!-- Birth Date -->
+    <div class="field">
+      <label class="field-label">🎂 Date de naissance</label>
+      <div class="field-input-wrap" [class.field-error]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched">
+        <input type="date" formControlName="birthDate" class="field-input" />
+      </div>
+      @if (form.get('birthDate')?.touched && form.get('birthDate')?.hasError('notInPast')) {
+        <span class="field-hint">La date doit être dans le passé</span>
+      }
+    </div>
+  </div>
+
+  @if (!editMode) {
+    <label class="toggle-row">
+      <input type="checkbox" formControlName="active" class="toggle-check" />
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span class="toggle-label">Membre actif</span>
+    </label>
+  }
+
+  <div class="form-footer">
+    <button type="submit" class="btn-submit" [disabled]="form.invalid">
+      {{ editMode ? '💾 Enregistrer' : '➕ Créer' }}
+    </button>
+  </div>
+</form>
