@@ -1,0 +1,74 @@
+<div class="edit-shell">
+  <div class="edit-card">
+    <div class="card-stripe"></div>
+
+    <div class="card-header">
+      <div class="card-icon">✏️</div>
+      <div class="card-title">Modifier le membre</div>
+      <div class="card-sub">Mettre à jour les informations personnelles</div>
+    </div>
+
+    @if (!member) {
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <span>Chargement des données…</span>
+      </div>
+    }
+
+    @if (member) {
+      @if (errorMsg) {
+        <div class="alert alert-err">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-txt">{{ errorMsg }}</span>
+        </div>
+      }
+      @if (successMsg) {
+        <div class="alert alert-ok">
+          <span class="alert-icon">✅</span>
+          <span class="alert-txt">{{ successMsg }}</span>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Prénom</label>
+            <input class="form-input" placeholder="Ahmed" name="firstName" [(ngModel)]="member.firstName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nom</label>
+            <input class="form-input" placeholder="Harrak" name="lastName" [(ngModel)]="member.lastName" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Téléphone</label>
+            <input class="form-input" placeholder="+212 6XX XXX XXX" name="phone" [(ngModel)]="member.phone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date de naissance</label>
+            <input class="form-input" type="date" name="birthDate" [(ngModel)]="member.birthDate">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <div class="status-toggle" (click)="member.active = !member.active">
+            <div class="toggle" [class.on]="member.active">
+              <div class="toggle-knob"></div>
+            </div>
+            <span class="status-label" [class.active]="member.active">{{ member.active ? 'Actif' : 'Inactif' }}</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-back" type="button" (click)="goBack()">← Retour</button>
+          <button class="btn-submit" type="submit" [disabled]="loading">
+            {{ loading ? 'Enregistrement...' : '💾 Sauvegarder les modifications' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>
