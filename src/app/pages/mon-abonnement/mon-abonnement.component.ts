@@ -50,7 +50,7 @@ export class MonAbonnementComponent implements OnInit {
   }
 
   getPlanName(planId: number): string {
-    return this.plans.find(p => p.id === planId)?.name || 'Plan #' + planId;
+    return this.plans.find(p => p.id === planId)?.name || 'Plan indisponible';
   }
 
   getPlanPrice(planId: number): string {
