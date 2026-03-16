@@ -600,7 +600,7 @@ export class AdminComponent implements OnInit {
   }
 
   getScheduleStatus(s: any): string {
-    if (this.isScheduleExpired(s.endTime)) return 'Expiré';
+    if (this.isScheduleExpired(s.endTime)) return 'Inactif';
     return s.active ? 'Actif' : 'En attente coach';
   }
 
@@ -876,12 +876,12 @@ export class AdminComponent implements OnInit {
 
   getPlanNameById(planId: number): string {
     const plan = this.plans.find(p => p.id === planId);
-    return plan ? plan.name : 'Plan #' + planId;
+    return plan ? plan.name : 'Plan indisponible';
   }
 
   getMemberNameById(memberId: number): string {
     const member = this.members.find(m => m.id === memberId);
-    return member ? (member.firstName + ' ' + member.lastName) : 'Membre #' + memberId;
+    return member ? (member.firstName + ' ' + member.lastName) : 'Membre indisponible';
   }
 
   private initializeSettingsForms(): void {
