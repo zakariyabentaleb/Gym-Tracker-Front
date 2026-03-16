@@ -24,7 +24,9 @@
       <a class="btn btn-primary" routerLink="/register">S'inscrire</a>
     } @else {
       <span class="user-role-badge">{{ auth.getUserRoles()[0] || 'User' }}</span>
-      <a class="btn btn-outline" routerLink="/members/me">Mon profil</a>
+      @if (!auth.hasRole('ROLE_COACH')) {
+        <a class="btn btn-outline" routerLink="/members/me">Mon profil</a>
+      }
       <button class="btn btn-outline" (click)="logout()">Logout</button>
     }
   </div>
