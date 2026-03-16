@@ -40,23 +40,13 @@
         <span class="nav-icon">💳</span><span class="nav-label">Abonnements</span>
         <span class="nav-badge badge-red">{{ totalPlans }}</span>
       </div>
-      <div class="nav-item" [class.active]="activePage === 'equipements'" (click)="goTo('equipements')">
-        <span class="nav-icon">🔧</span><span class="nav-label">Équipements</span>
-      </div>
       <div class="nav-item" [class.active]="activePage === 'finances'" (click)="goTo('finances')">
         <span class="nav-icon">💰</span><span class="nav-label">Finances</span>
-      </div>
-      <div class="nav-item" [class.active]="activePage === 'rapports'" (click)="goTo('rapports')">
-        <span class="nav-icon">📈</span><span class="nav-label">Rapports</span>
       </div>
     </div>
 
     <div class="nav-group">
       <div class="nav-group-label">Système</div>
-      <div class="nav-item" [class.active]="activePage === 'notifications'" (click)="goTo('notifications')">
-        <span class="nav-icon">🔔</span><span class="nav-label">Notifications</span>
-        <span class="nav-badge badge-orange">5</span>
-      </div>
       <div class="nav-item" [class.active]="activePage === 'parametres'" (click)="goTo('parametres')">
         <span class="nav-icon">⚙️</span><span class="nav-label">Paramètres</span>
       </div>
@@ -105,22 +95,6 @@
       <!-- ════════════════════ PAGE: DASHBOARD ════════════════════ -->
       <div class="page" [class.active]="activePage === 'dashboard'">
 
-        <!-- ALERTS -->
-        @if (showAlertMaintenance) {
-          <div class="alert alert-err">
-            <span class="alert-icon">⚠️</span>
-            <span class="alert-txt"><strong>3 rameurs</strong> nécessitent une maintenance urgente — intervention requise avant lundi</span>
-            <span class="alert-close" (click)="showAlertMaintenance = false">✕</span>
-          </div>
-        }
-        @if (showAlertExpiring) {
-          <div class="alert alert-warn">
-            <span class="alert-icon">⏰</span>
-            <span class="alert-txt"><strong>24 abonnements</strong> expirent dans moins de 7 jours — envoyer rappels automatiques</span>
-            <span class="alert-close" (click)="showAlertExpiring = false">✕</span>
-          </div>
-        }
-
         <!-- KPIs -->
         <div class="kpi-grid">
           <div class="kpi">
@@ -135,200 +109,151 @@
           <div class="kpi">
             <div class="kpi-top">
               <div class="kpi-icon ico-green">💰</div>
-              <span class="kpi-delta up">↑ +12%</span>
+              <span
+                class="kpi-delta"
+                [class.up]="monthRevenueDeltaPct !== null && monthRevenueDeltaPct >= 0"
+                [class.down]="monthRevenueDeltaPct !== null && monthRevenueDeltaPct < 0"
+                [class.neutral]="monthRevenueDeltaPct === null"
+              >
+                @if (monthRevenueDeltaPct !== null) {
+                  {{ monthRevenueDeltaPct! >= 0 ? '↑ +' : '↓ ' }}{{ monthRevenueDeltaPct! | number:'1.0-1' }}%
+                } @else {
+                  → N/A
+                }
+              </span>
             </div>
-            <div class="kpi-val">18 450</div>
-            <div class="kpi-lbl">Revenus mars (MAD)</div>
-            <div class="kpi-sub">Objectif : 20 000 MAD</div>
+            <div class="kpi-val">{{ formatPrice(monthRevenueCents) }}</div>
+            <div class="kpi-lbl">Revenus du mois (MAD)</div>
+            <div class="kpi-sub">Mois précédent : {{ formatPrice(previousMonthRevenueCents) }} MAD</div>
           </div>
           <div class="kpi">
             <div class="kpi-top">
-              <div class="kpi-icon ico-blue">🏃</div>
-              <span class="kpi-delta up">↑ +5</span>
+              <div class="kpi-icon ico-blue">📅</div>
+              <span class="kpi-delta neutral">→ Planning</span>
             </div>
-            <div class="kpi-val">67</div>
-            <div class="kpi-lbl">Présents maintenant</div>
-            <div class="kpi-sub">Capacité max : 116</div>
+            <div class="kpi-val">{{ upcomingSchedulesDashboard.length }}</div>
+            <div class="kpi-lbl">Séances à venir</div>
+            <div class="kpi-sub">Total planifiées : {{ totalSchedules }}</div>
           </div>
           <div class="kpi">
             <div class="kpi-top">
               <div class="kpi-icon ico-red">⚠️</div>
-              <span class="kpi-delta down">↓ Urgent</span>
+              <span class="kpi-delta" [class.down]="expiringSoonSubscriptions.length > 0" [class.neutral]="expiringSoonSubscriptions.length === 0">
+                {{ expiringSoonSubscriptions.length > 0 ? '↓ Urgent' : '✓ Stable' }}
+              </span>
             </div>
-            <div class="kpi-val">24</div>
+            <div class="kpi-val">{{ expiringSoonSubscriptions.length }}</div>
             <div class="kpi-lbl">Abonnements expirant</div>
             <div class="kpi-sub">Dans les 7 prochains jours</div>
           </div>
         </div>
 
         <!-- ROW 1 -->
-        <div class="grid-a" style="margin-bottom:16px;">
-          <!-- BAR CHART -->
+        <div class="grid-a" style="margin-bottom:16px;grid-template-columns:1fr;">
+          <!-- ENCAISSEMENTS DU MOIS -->
           <div class="card">
             <div class="card-head">
               <div>
-                <div class="card-title">Fréquentation hebdomadaire</div>
-                <div class="card-meta">Entrées par jour — semaine courante</div>
+                <div class="card-title">Encaissements du mois</div>
+                <div class="card-meta">Paiements complétés · {{ monthCompletedPayments.length }} transactions</div>
               </div>
-              <div class="live"><div class="live-dot"></div> En direct</div>
+              <div class="live">
+                <div class="live-dot"></div>
+                @if (monthRevenueDeltaPct !== null) {
+                  {{ monthRevenueDeltaPct! >= 0 ? '+' : '' }}{{ monthRevenueDeltaPct! | number:'1.0-1' }}%
+                } @else {
+                  N/A
+                }
+              </div>
             </div>
-            <div class="tabs">
-              <div class="tab" [class.active]="chartTab === 'week'" (click)="chartTab = 'week'">Semaine</div>
-              <div class="tab" [class.active]="chartTab === 'month'" (click)="chartTab = 'month'">Mois</div>
-              <div class="tab" [class.active]="chartTab === 'year'" (click)="chartTab = 'year'">Année</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:4px 0 14px 0;">
+              <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--glass)">
+                <div style="font-size:11px;color:var(--muted)">Mois en cours</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1.1;color:var(--green)">{{ formatPrice(monthRevenueCents) }}</div>
+                <div style="font-size:10px;color:var(--muted)">MAD</div>
+              </div>
+              <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--glass)">
+                <div style="font-size:11px;color:var(--muted)">Mois précédent</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1.1">{{ formatPrice(previousMonthRevenueCents) }}</div>
+                <div style="font-size:10px;color:var(--muted)">MAD</div>
+              </div>
+              <div style="padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--glass)">
+                <div style="font-size:11px;color:var(--muted)">Transactions</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1.1">{{ monthCompletedPayments.length }}</div>
+                <div style="font-size:10px;color:var(--muted)">paiements</div>
+              </div>
             </div>
-            <div class="bar-chart">
-              @for (day of chartDays; track day.label) {
-                <div class="bc-group">
-                  <div class="bc-bar a" [style.height.%]="day.men" [attr.data-v]="day.menVal"></div>
-                  <div class="bc-bar b" [style.height.%]="day.women" [attr.data-v]="day.womenVal"></div>
-                  <div class="bc-lbl">{{ day.label }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              @for (p of monthCompletedPayments.slice(0, 5); track p.id) {
+                <div class="feed-item" style="margin:0">
+                  <div class="feed-dot" style="background:var(--green)"></div>
+                  <div class="feed-body">
+                    <div class="feed-txt"><strong>{{ getMemberNameById(p.memberId) }}</strong> · {{ p.method }}</div>
+                    <div class="feed-time">{{ formatPaymentDate(p.paymentDate) }}</div>
+                  </div>
+                  <div style="font-size:13px;font-weight:700;color:var(--green)">{{ formatPrice(p.amountCents) }} MAD</div>
                 </div>
               }
-            </div>
-            <div style="display:flex;gap:16px;margin-top:10px;">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
-                <div style="width:10px;height:10px;border-radius:3px;background:var(--accent);"></div> Hommes
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
-                <div style="width:10px;height:10px;border-radius:3px;background:rgba(59,130,246,0.45);"></div> Femmes
-              </div>
-              <div style="margin-left:auto;font-size:12px;color:var(--muted);">Total semaine : <strong style="color:var(--text)">330</strong> entrées</div>
+              @if (monthCompletedPayments.length === 0) {
+                <div style="color:var(--muted);font-size:13px;padding:12px 0;text-align:center">Aucun paiement complété ce mois-ci.</div>
+              }
             </div>
           </div>
 
-          <!-- REVENUS RING -->
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <div class="card-title">Revenus par plan</div>
-                <div class="card-meta">Répartition · mars 2026</div>
-              </div>
-              <span class="card-action">Détails →</span>
-            </div>
-            <div class="ring-wrap" style="margin-top:6px;">
-              <div class="ring">
-                <svg width="110" height="110" viewBox="0 0 110 110">
-                  <circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
-                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--accent)" stroke-width="12"
-                    stroke-dasharray="124.3 152.4" stroke-dashoffset="0" stroke-linecap="round"/>
-                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--blue)" stroke-width="12"
-                    stroke-dasharray="83.1 193.6" stroke-dashoffset="-127.3" stroke-linecap="round"/>
-                  <circle cx="55" cy="55" r="44" fill="none" stroke="var(--green)" stroke-width="12"
-                    stroke-dasharray="69.1 207.6" stroke-dashoffset="-212.4" stroke-linecap="round"/>
-                </svg>
-                <div class="ring-center">
-                  <div class="ring-num">18k</div>
-                  <div class="ring-unit">MAD</div>
-                </div>
-              </div>
-              <div class="ring-legend">
-                <div class="rl-item">
-                  <div class="rl-dot" style="background:var(--accent)"></div>
-                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Premium</div><div style="font-size:10px;color:var(--muted)">154 membres</div></div>
-                  <div class="rl-val" style="color:var(--accent)">8 302</div>
-                </div>
-                <div class="rl-item">
-                  <div class="rl-dot" style="background:var(--blue)"></div>
-                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Standard</div><div style="font-size:10px;color:var(--muted)">103 membres</div></div>
-                  <div class="rl-val" style="color:var(--blue)">5 535</div>
-                </div>
-                <div class="rl-item">
-                  <div class="rl-dot" style="background:var(--green)"></div>
-                  <div class="rl-name"><div style="font-size:12px;font-weight:600">Journalier</div><div style="font-size:10px;color:var(--muted)">85 entrées</div></div>
-                  <div class="rl-val" style="color:var(--green)">4 613</div>
-                </div>
-              </div>
-            </div>
-            <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
-              <div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--green)">+12%</div>
-                <div style="font-size:10px;color:var(--muted)">vs mois dernier</div>
-              </div>
-              <div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px">204k</div>
-                <div style="font-size:10px;color:var(--muted)">YTD total</div>
-              </div>
-              <div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent)">53</div>
-                <div style="font-size:10px;color:var(--muted)">MAD/membre</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- ROW 2 -->
-        <div class="grid-3" style="margin-bottom:16px;">
-          <!-- PLANNING TODAY -->
+        <div class="grid-2" style="margin-bottom:16px;">
+
+          <!-- ABONNEMENTS EXPIRANT BIENTÔT -->
           <div class="card">
             <div class="card-head">
               <div>
-                <div class="card-title">Planning du jour</div>
-                <div class="card-meta">Dimanche 8 mars</div>
+                <div class="card-title">Abonnements expirant sous 7 jours</div>
+                <div class="card-meta">{{ expiringSoonSubscriptions.length }} abonnement(s) à traiter</div>
               </div>
-              <span class="card-action">Gérer +</span>
+              <div class="live"><div class="live-dot"></div>Priorité</div>
             </div>
-            <div class="sched-item">
-              <div class="sched-time">07:00</div>
-              <div class="sched-info"><div class="sched-name">CrossFit Matinal</div><div class="sched-meta">Coach Hassan · Salle A</div></div>
-              <div class="sched-spots"><div style="color:var(--accent)">18/20</div><div class="sched-bar"><div class="sched-fill" style="width:90%;background:var(--accent)"></div></div></div>
-            </div>
-            <div class="sched-item">
-              <div class="sched-time">09:30</div>
-              <div class="sched-info"><div class="sched-name">Yoga & Pilates</div><div class="sched-meta">Coach Leila · Salle B</div></div>
-              <div class="sched-spots"><div style="color:var(--blue)">12/20</div><div class="sched-bar"><div class="sched-fill" style="width:60%;background:var(--blue)"></div></div></div>
-            </div>
-            <div class="sched-item">
-              <div class="sched-time">12:00</div>
-              <div class="sched-info"><div class="sched-name">Musculation libre</div><div class="sched-meta">Accès libre · Zone Cardio</div></div>
-              <div class="sched-spots"><div style="color:var(--green)">8/20</div><div class="sched-bar"><div class="sched-fill" style="width:40%;background:var(--green)"></div></div></div>
-            </div>
-            <div class="sched-item">
-              <div class="sched-time">18:00</div>
-              <div class="sched-info"><div class="sched-name">Zumba</div><div class="sched-meta">Coach Sara · Salle A</div></div>
-              <div class="sched-spots"><div style="color:var(--purple)">15/20</div><div class="sched-bar"><div class="sched-fill" style="width:75%;background:var(--purple)"></div></div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              @for (s of expiringSoonSubscriptions; track s.id) {
+                <div class="sched-item" style="padding:10px 0;">
+                  <div class="sched-time">J+{{ daysUntil(s.endDate) }}</div>
+                  <div class="sched-info">
+                    <div class="sched-name">{{ getPlanNameById(s.planId) }}</div>
+                    <div class="sched-meta">Membre #{{ s.memberId }} · Fin: {{ formatSubDate(s.endDate) }}</div>
+                  </div>
+                  <div class="sched-spots"><span class="pill pill-orange">Expire bientôt</span></div>
+                </div>
+              }
+              @if (expiringSoonSubscriptions.length === 0) {
+                <div style="color:var(--green);font-size:13px;padding:12px 0;text-align:center">Aucun abonnement actif n'expire dans les 7 jours.</div>
+              }
             </div>
           </div>
 
-          <!-- OCCUPATION EN DIRECT -->
+          <!-- PROCHAINES SÉANCES -->
           <div class="card">
             <div class="card-head">
               <div>
-                <div class="card-title">Occupation en direct</div>
-                <div class="card-meta">Par zone · maintenant</div>
+                <div class="card-title">Prochaines séances</div>
+                <div class="card-meta">{{ upcomingSchedulesDashboard.length }} séance(s) à venir</div>
               </div>
-              <div class="live"><div class="live-dot"></div>67</div>
+              <span class="card-action">Planning</span>
             </div>
-            <div class="occ-row"><div class="occ-zone">🏋️ Musculation</div><div class="occ-track"><div class="occ-fill" style="width:75%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div><div class="occ-num">30/40</div></div>
-            <div class="occ-row"><div class="occ-zone">🚴 Cardio</div><div class="occ-track"><div class="occ-fill" style="width:60%;background:linear-gradient(90deg,var(--blue),#93c5fd)"></div></div><div class="occ-num">15/25</div></div>
-            <div class="occ-row"><div class="occ-zone">🧘 Yoga</div><div class="occ-track"><div class="occ-fill" style="width:40%;background:linear-gradient(90deg,var(--purple),#d8b4fe)"></div></div><div class="occ-num">8/20</div></div>
-            <div class="occ-row"><div class="occ-zone">🥊 Boxe</div><div class="occ-track"><div class="occ-fill" style="width:67%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div class="occ-num">10/15</div></div>
-            <div class="occ-row"><div class="occ-zone">🏊 Piscine</div><div class="occ-track"><div class="occ-fill" style="width:25%;background:linear-gradient(90deg,#06b6d4,#67e8f9)"></div></div><div class="occ-num">4/16</div></div>
-            <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;">
-              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px">
-                <span>Taux d'occupation total</span>
-                <span style="font-weight:700;color:var(--accent)">57.7%</span>
-              </div>
-              <div class="prog-bar"><div class="prog-fill" style="width:57.7%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div>
-            </div>
-          </div>
-
-          <!-- ACTIVITÉ RÉCENTE -->
-          <div class="card">
-            <div class="card-head">
-              <div>
-                <div class="card-title">Activité récente</div>
-                <div class="card-meta">Dernières actions · aujourd'hui</div>
-              </div>
-              <span class="card-action">Voir tout →</span>
-            </div>
-            <div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div class="feed-body"><div class="feed-txt"><strong>Ahmed Harrak</strong> a renouvelé son abonnement Premium</div><div class="feed-time">Il y a 4 min</div></div></div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--blue)"></div><div class="feed-body"><div class="feed-txt"><strong>Salma Kettani</strong> a réservé CrossFit 18h00</div><div class="feed-time">Il y a 11 min</div></div></div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--accent)"></div><div class="feed-body"><div class="feed-txt"><strong>Nouveau membre</strong> Youssef Benali inscrit — Plan Standard</div><div class="feed-time">Il y a 27 min</div></div></div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--red)"></div><div class="feed-body"><div class="feed-txt"><strong>Équipement</strong> Rameur #4 signalé en panne</div><div class="feed-time">Il y a 45 min</div></div></div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--purple)"></div><div class="feed-body"><div class="feed-txt"><strong>Nadia Mansouri</strong> abonnement expiré — rappel envoyé</div><div class="feed-time">Il y a 1h</div></div></div>
-              <div class="feed-item"><div class="feed-dot" style="background:var(--green)"></div><div class="feed-body"><div class="feed-txt"><strong>Paiement reçu</strong> 399 MAD · Karim Alaoui</div><div class="feed-time">Il y a 1h 20min</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              @for (s of upcomingSchedulesDashboard; track s.id) {
+                <div class="sched-item" style="padding:10px 0;">
+                  <div class="sched-time">{{ formatTime(s.startTime) }}</div>
+                  <div class="sched-info">
+                    <div class="sched-name">{{ getCourseName(s.courseId) }}</div>
+                    <div class="sched-meta">{{ getCoachName(s.coachId) }} · {{ s.room || 'Salle non définie' }} · {{ formatDate(s.startTime) }}</div>
+                  </div>
+                  <div class="sched-spots"><span class="pill pill-green">À venir</span></div>
+                </div>
+              }
+              @if (upcomingSchedulesDashboard.length === 0) {
+                <div style="color:var(--muted);font-size:13px;padding:12px 0;text-align:center">Aucune séance à venir.</div>
+              }
             </div>
           </div>
         </div>
@@ -588,30 +513,6 @@
         }
       </div>
 
-      <!-- ════════════════════ PAGE: ÉQUIPEMENTS ════════════════════ -->
-      <div class="page" [class.active]="activePage === 'equipements'">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta up">+2</span></div><div class="kpi-val">182</div><div class="kpi-lbl">En bon état</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-yellow">🔧</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">8</div><div class="kpi-lbl">En maintenance</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-red">❌</div><span class="kpi-delta down">↑ +3</span></div><div class="kpi-val">5</div><div class="kpi-lbl">Hors service</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-blue">📦</div><span class="kpi-delta neutral">→</span></div><div class="kpi-val">195</div><div class="kpi-lbl">Total équipements</div></div>
-        </div>
-        @if (showEquipAlert) {
-          <div class="alert alert-err"><span class="alert-icon">🚨</span><span class="alert-txt"><strong>Rameurs #4, #5, #6</strong> — Hors service, intervention urgente requise avant lundi matin</span><span class="alert-close" (click)="showEquipAlert = false">✕</span></div>
-        }
-        <div class="card">
-          <div class="card-head"><div><div class="card-title">État des équipements</div><div class="card-meta">195 équipements · dernière vérif. 07/03/2026</div></div><button class="btn-add" style="font-size:12px;padding:8px 14px;">＋ Signaler panne</button></div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;">
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Tapis de course</div><div class="equip-count">16/18 disponibles</div></div><div class="equip-icon">🏃</div></div><div class="prog-bar"><div class="prog-fill" style="width:89%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>Dernier entretien : 01/03</span><span style="color:var(--green);font-weight:700">Bon état ✓</span></div></div>
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Vélos elliptiques</div><div class="equip-count">7/10 disponibles</div></div><div class="equip-icon">🚴</div></div><div class="prog-bar"><div class="prog-fill" style="width:70%;background:linear-gradient(90deg,var(--blue),#93c5fd)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>3 en maintenance</span><span style="color:var(--blue);font-weight:700">Normal</span></div></div>
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Machines musculation</div><div class="equip-count">20/25 disponibles</div></div><div class="equip-icon">🏋️</div></div><div class="prog-bar"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--accent),#fdba74)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>5 en révision</span><span style="color:var(--accent);font-weight:700">Maintenance</span></div></div>
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Rameurs</div><div class="equip-count">3/6 disponibles</div></div><div class="equip-icon">🚣</div></div><div class="prog-bar"><div class="prog-fill" style="width:50%;background:linear-gradient(90deg,var(--red),#fca5a5)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>3 hors service</span><span style="color:var(--red);font-weight:700">⚠️ URGENT</span></div></div>
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Haltères & barres</div><div class="equip-count">Complet</div></div><div class="equip-icon">🏋️‍♂️</div></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:linear-gradient(90deg,var(--green),#86efac)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>Dernier entretien : 05/03</span><span style="color:var(--green);font-weight:700">Excellent ✓</span></div></div>
-            <div class="equip-card"><div class="equip-top"><div><div class="equip-name">Équipements boxe</div><div class="equip-count">8/10 disponibles</div></div><div class="equip-icon">🥊</div></div><div class="prog-bar"><div class="prog-fill" style="width:80%;background:linear-gradient(90deg,var(--purple),#d8b4fe)"></div></div><div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)"><span>2 en réparation</span><span style="color:var(--purple);font-weight:700">Bon état</span></div></div>
-          </div>
-        </div>
-      </div>
-
       <!-- ════════════════════ PAGE: FINANCES ════════════════════ -->
       <div class="page" [class.active]="activePage === 'finances'">
         <!-- KPIs -->
@@ -697,49 +598,6 @@
             </div>
           </div>
         }
-      </div>
-
-      <!-- ════════════════════ PAGE: RAPPORTS ════════════════════ -->
-      <div class="page" [class.active]="activePage === 'rapports'">
-        @if (showReportAlert) {
-          <div class="alert alert-ok"><span class="alert-icon">📊</span><span class="alert-txt">Rapport mensuel de <strong>février 2026</strong> disponible — record de fréquentation atteint</span><span class="alert-close" (click)="showReportAlert = false">✕</span></div>
-        }
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-head"><div><div class="card-title">Performance mensuelle</div><div class="card-meta">Comparaison jan – mars 2026</div></div></div>
-            <div style="margin-top:4px">
-              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:10px"><span>Indicateur</span><span>Jan</span><span>Fév</span><span>Mars (en cours)</span></div>
-              <div class="metric-row"><span class="metric-label">👥 Membres</span><span style="font-size:13px">308</span><span style="font-size:13px">328</span><span style="font-size:13px;color:var(--green);font-weight:700">342 ↑</span></div>
-              <div class="metric-row"><span class="metric-label">💰 Revenus</span><span style="font-size:13px">16.2k</span><span style="font-size:13px">16.5k</span><span style="font-size:13px;color:var(--green);font-weight:700">18.4k ↑</span></div>
-              <div class="metric-row"><span class="metric-label">🏃 Fréq./jour</span><span style="font-size:13px">48</span><span style="font-size:13px">52</span><span style="font-size:13px;color:var(--green);font-weight:700">61 ↑</span></div>
-              <div class="metric-row"><span class="metric-label">🔄 Taux renouv.</span><span style="font-size:13px">78%</span><span style="font-size:13px">80%</span><span style="font-size:13px;color:var(--green);font-weight:700">82% ↑</span></div>
-              <div class="metric-row"><span class="metric-label">⭐ Satisfaction</span><span style="font-size:13px">4.6</span><span style="font-size:13px">4.7</span><span style="font-size:13px;color:var(--green);font-weight:700">4.8 ↑</span></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><div><div class="card-title">Rapports disponibles</div><div class="card-meta">Télécharger les bilans</div></div></div>
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
-              <div class="report-row"><span style="font-size:22px">📄</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan mars 2026 (partiel)</div><div style="font-size:11px;color:var(--muted)">Mis à jour ce matin</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
-              <div class="report-row"><span style="font-size:22px">📊</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan complet février 2026</div><div style="font-size:11px;color:var(--muted)">Record fréquentation mensuelle</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
-              <div class="report-row"><span style="font-size:22px">📈</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Bilan Q1 2026</div><div style="font-size:11px;color:var(--muted)">Jan + Fév + Mars (en cours)</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 Excel</span></div>
-              <div class="report-row"><span style="font-size:22px">🗓️</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Rapport annuel 2025</div><div style="font-size:11px;color:var(--muted)">Bilan complet — 12 mois</div></div><span style="color:var(--accent);font-size:12px;font-weight:600">📥 PDF</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ════════════════════ PAGE: NOTIFICATIONS ════════════════════ -->
-      <div class="page" [class.active]="activePage === 'notifications'">
-        <div class="card">
-          <div class="card-head"><div><div class="card-title">Centre de notifications</div><div class="card-meta">5 non lues</div></div><span class="card-action">Tout marquer lu</span></div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div class="notif-item" style="background:rgba(249,115,22,0.05);border-color:rgba(249,115,22,0.18)"><span style="font-size:22px;flex-shrink:0">🚨</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Maintenance urgente — Rameurs</div><div style="font-size:13px;color:var(--muted2)">Les rameurs #4, #5 et #6 sont hors service. Intervention requise avant lundi.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 45 min</div></div><span class="pill pill-red" style="height:fit-content">Urgent</span></div>
-            <div class="notif-item" style="background:rgba(234,179,8,0.05);border-color:rgba(234,179,8,0.18)"><span style="font-size:22px;flex-shrink:0">⏰</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">24 abonnements expirent bientôt</div><div style="font-size:13px;color:var(--muted2)">Les abonnements de 24 membres arrivent à expiration dans les 7 prochains jours.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 1h</div></div><span class="pill pill-orange" style="height:fit-content">Attention</span></div>
-            <div class="notif-item" style="background:rgba(34,197,94,0.04);border-color:rgba(34,197,94,0.15)"><span style="font-size:22px;flex-shrink:0">🎉</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Nouvel objectif mensuel atteint</div><div style="font-size:13px;color:var(--muted2)">Le taux de fréquentation de mars dépasse déjà celui de février — félicitations à l'équipe !</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 2h</div></div><span class="pill pill-green" style="height:fit-content">Info</span></div>
-            <div class="notif-item"><span style="font-size:22px;flex-shrink:0">💰</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Paiement reçu · Ahmed Harrak</div><div style="font-size:13px;color:var(--muted2)">Renouvellement Premium confirmé — 399 MAD encaissé.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 3h</div></div><span class="pill pill-green" style="height:fit-content">OK</span></div>
-            <div class="notif-item"><span style="font-size:22px;flex-shrink:0">👤</span><div style="flex:1"><div style="font-size:14px;font-weight:600;margin-bottom:3px">Nouveau membre inscrit</div><div style="font-size:13px;color:var(--muted2)">Youssef Benali s'est inscrit au plan Standard — accueil à prévoir.</div><div style="font-size:11px;color:var(--muted);margin-top:5px">Il y a 27 min</div></div><span class="pill pill-blue" style="height:fit-content">Nouveau</span></div>
-          </div>
-        </div>
       </div>
 
       <!-- ════════════════════ PAGE: PARAMÈTRES ════════════════════ -->
