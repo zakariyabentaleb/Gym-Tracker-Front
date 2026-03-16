@@ -7,6 +7,12 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private base = environment.apiUrl;
+  private readonly roleLabels: Record<string, string> = {
+    ROLE_ADMIN: 'Admin',
+    ROLE_RECEPTIONIST: 'Réception',
+    ROLE_COACH: 'Coach',
+    ROLE_MEMBER: 'Membre'
+  };
 
   constructor(private http: HttpClient) {}
 
@@ -59,6 +65,14 @@ export class AuthService {
 
   getRoles(): string[] {
     return this.getUserRoles();
+  }
+
+  getUserRoleLabels(): string[] {
+    return this.getUserRoles().map(role => this.roleLabels[role] || role.replace(/^ROLE_/, ''));
+  }
+
+  getPrimaryRoleLabel(): string {
+    return this.getUserRoleLabels()[0] || 'Utilisateur';
   }
 
   hasRole(role: string): boolean {
