@@ -33,7 +33,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrls: ['./list-members.component.css']
 })
 export class ListMembersComponent implements OnInit {
-  displayedColumns = ['id', 'firstName', 'lastName', 'phone', 'active', 'actions'];
+  displayedColumns = ['firstName', 'lastName', 'phone', 'active', 'actions'];
   members: MemberResponse[] = [];
   total = 0;
   page = 0;
