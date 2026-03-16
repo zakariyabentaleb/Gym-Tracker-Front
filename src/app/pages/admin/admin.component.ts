@@ -19,14 +19,6 @@ import { SubscriptionResponse } from '../../models/subscription.model';
 import { PaymentResponse } from '../../models/payment.model';
 import { switchMap } from 'rxjs';
 
-interface ChartDay {
-  label: string;
-  men: number;
-  women: number;
-  menVal: number;
-  womenVal: number;
-}
-
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -51,24 +43,6 @@ export class AdminComponent implements OnInit {
   /* ── dashboard KPIs ── */
   totalMembers = 0;
   activeMembers = 0;
-
-  /* ── alerts ── */
-  showAlertMaintenance = true;
-  showAlertExpiring = true;
-  showEquipAlert = true;
-  showReportAlert = true;
-
-  /* ── chart ── */
-  chartTab = 'week';
-  chartDays: ChartDay[] = [
-    { label: 'Lun', men: 60, women: 40, menVal: 36, womenVal: 24 },
-    { label: 'Mar', men: 72, women: 50, menVal: 43, womenVal: 30 },
-    { label: 'Mer', men: 55, women: 45, menVal: 33, womenVal: 27 },
-    { label: 'Jeu', men: 80, women: 58, menVal: 48, womenVal: 35 },
-    { label: 'Ven', men: 90, women: 65, menVal: 54, womenVal: 39 },
-    { label: 'Sam', men: 68, women: 48, menVal: 41, womenVal: 29 },
-    { label: 'Dim', men: 45, women: 32, menVal: 27, womenVal: 19 }
-  ];
 
   /* ── members table ── */
   members: MemberResponse[] = [];
@@ -163,10 +137,7 @@ export class AdminComponent implements OnInit {
     planning:      { title: 'Planning',         breadcrumb: 'Planification des cours' },
     coachs:        { title: 'Coachs',           breadcrumb: 'Équipe de coachs' },
     abonnements:   { title: 'Abonnements',      breadcrumb: 'Gestion des plans' },
-    equipements:   { title: 'Équipements',      breadcrumb: 'État du matériel' },
     finances:      { title: 'Finances',         breadcrumb: 'Revenus & dépenses' },
-    rapports:      { title: 'Rapports',         breadcrumb: 'Bilans & statistiques' },
-    notifications: { title: 'Notifications',    breadcrumb: 'Centre d\'alertes' },
     parametres:    { title: 'Paramètres',       breadcrumb: 'Configuration' }
   };
 
@@ -203,6 +174,8 @@ export class AdminComponent implements OnInit {
     this.loadCourses();
     this.loadSchedules();
     this.loadPlans();
+    this.loadPayments();
+    this.loadSubscriptions();
   }
 
   /* ── navigation ── */
@@ -806,6 +779,68 @@ export class AdminComponent implements OnInit {
         this.activeSubscriptions = data.filter(s => s.status === 'ACTIVE').length;
       }
     });
+  }
+
+  get monthCompletedPayments(): PaymentResponse[] {
+    const now = new Date();
+    return this.allPayments
+      .filter(p => p.status === 'COMPLETED' && this.isSameMonth(new Date(p.paymentDate), now))
+      .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+  }
+
+  get previousMonthCompletedPayments(): PaymentResponse[] {
+    const prev = new Date();
+    prev.setMonth(prev.getMonth() - 1);
+    return this.allPayments
+      .filter(p => p.status === 'COMPLETED' && this.isSameMonth(new Date(p.paymentDate), prev));
+  }
+
+  get monthRevenueCents(): number {
+    return this.monthCompletedPayments.reduce((sum, p) => sum + (p.amountCents || 0), 0);
+  }
+
+  get previousMonthRevenueCents(): number {
+    return this.previousMonthCompletedPayments.reduce((sum, p) => sum + (p.amountCents || 0), 0);
+  }
+
+  get monthRevenueDeltaPct(): number | null {
+    const previous = this.previousMonthRevenueCents;
+    if (!previous) return null;
+    return ((this.monthRevenueCents - previous) / previous) * 100;
+  }
+
+  get expiringSoonSubscriptions(): SubscriptionResponse[] {
+    const now = new Date();
+    const in7days = new Date();
+    in7days.setDate(in7days.getDate() + 7);
+
+    return this.allSubscriptions
+      .filter(s => s.status === 'ACTIVE')
+      .filter(s => {
+        const end = new Date(s.endDate);
+        return end >= now && end <= in7days;
+      })
+      .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime())
+      .slice(0, 6);
+  }
+
+  get upcomingSchedulesDashboard(): CourseScheduleResponse[] {
+    const now = new Date();
+    return this.schedules
+      .filter(s => (s.active ?? true) && new Date(s.startTime).getTime() >= now.getTime())
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+      .slice(0, 6);
+  }
+
+  daysUntil(iso: string): number {
+    const now = new Date();
+    const target = new Date(iso);
+    const diff = target.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  private isSameMonth(date: Date, reference: Date): boolean {
+    return date.getFullYear() === reference.getFullYear() && date.getMonth() === reference.getMonth();
   }
 
   formatPaymentDate(iso: string): string {
