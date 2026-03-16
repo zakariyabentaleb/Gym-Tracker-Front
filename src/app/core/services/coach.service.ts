@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { CoachResponse, CoachCreateRequest } from '../../models/coach.model';
+import { CourseScheduleResponse } from '../../models/course.model';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -26,8 +27,20 @@ export class CoachService {
     return this.http.get<CoachResponse>(`${this.base}/${id}`);
   }
 
+  myProfile(): Observable<CoachResponse> {
+    return this.http.get<CoachResponse>(`${this.base}/me`);
+  }
+
   update(id: number, req: CoachCreateRequest): Observable<CoachResponse> {
     return this.http.put<CoachResponse>(`${this.base}/${id}`, req);
+  }
+
+  updateMyProfile(req: CoachCreateRequest): Observable<CoachResponse> {
+    return this.http.put<CoachResponse>(`${this.base}/me`, req);
+  }
+  
+  confirmMySchedule(scheduleId: number): Observable<CourseScheduleResponse> {
+    return this.http.post<CourseScheduleResponse>(`${this.base}/me/schedules/${scheduleId}/confirm`, {});
   }
 
   delete(id: number): Observable<void> {
