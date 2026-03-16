@@ -30,6 +30,10 @@ export class CourseScheduleService {
     return this.http.put<CourseScheduleResponse>(`${this.base}/${id}`, req);
   }
 
+  confirm(id: number): Observable<CourseScheduleResponse> {
+    return this.http.post<CourseScheduleResponse>(`${this.base}/${id}/confirm`, {});
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
