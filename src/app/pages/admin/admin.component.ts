@@ -126,7 +126,7 @@ export class AdminComponent implements OnInit {
   scheduleModalSuccess = '';
   scheduleModalLoading = false;
   editingScheduleId: number | null = null;
-  newSchedule = { courseId: 0, coachId: 0 as number | null, room: '', startTime: '', endTime: '', capacity: 20, active: true };
+  newSchedule = { courseId: 0, coachId: 0 as number | null, room: '', startTime: '', endTime: '', capacity: 20, active: false };
 
   /* ── subscription plans ── */
   plans: PlanResponse[] = [];
@@ -601,14 +601,14 @@ export class AdminComponent implements OnInit {
 
   getScheduleStatus(s: any): string {
     if (this.isScheduleExpired(s.endTime)) return 'Expiré';
-    return s.active ? 'Actif' : 'Inactif';
+    return s.active ? 'Actif' : 'En attente coach';
   }
 
   openScheduleModal(): void {
     this.editingScheduleId = null;
     this.scheduleModalError = '';
     this.scheduleModalSuccess = '';
-    this.newSchedule = { courseId: this.courses[0]?.id || 0, coachId: null, room: '', startTime: '', endTime: '', capacity: 20, active: true };
+    this.newSchedule = { courseId: this.courses[0]?.id || 0, coachId: null, room: '', startTime: '', endTime: '', capacity: 20, active: false };
     this.showScheduleModal = true;
   }
 
@@ -654,7 +654,7 @@ export class AdminComponent implements OnInit {
       startTime: pad(this.newSchedule.startTime),
       endTime: pad(this.newSchedule.endTime),
       capacity: this.newSchedule.capacity,
-      active: this.newSchedule.active
+      active: this.editingScheduleId ? this.newSchedule.active : false
     };
 
     const obs = this.editingScheduleId
@@ -664,7 +664,7 @@ export class AdminComponent implements OnInit {
     obs.subscribe({
       next: () => {
         this.scheduleModalLoading = false;
-        this.scheduleModalSuccess = this.editingScheduleId ? 'Séance modifiée !' : 'Séance créée !';
+        this.scheduleModalSuccess = this.editingScheduleId ? 'Séance modifiée !' : 'Séance créée en attente de confirmation coach !';
         this.loadSchedules();
         setTimeout(() => this.closeScheduleModal(), 1200);
       },
