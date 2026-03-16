@@ -44,6 +44,25 @@ export class AdminComponent implements OnInit {
   totalMembers = 0;
   activeMembers = 0;
 
+  /* ── settings: profile & password ── */
+  profileForm = {
+    displayName: '',
+    email: '',
+    phone: ''
+  };
+  profileLoading = false;
+  profileSuccess = '';
+  profileError = '';
+
+  passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  };
+  passwordLoading = false;
+  passwordSuccess = '';
+  passwordError = '';
+
   /* ── members table ── */
   members: MemberResponse[] = [];
   memberSearch = '';
@@ -168,6 +187,8 @@ export class AdminComponent implements OnInit {
       this.adminName = payload.sub;
       this.adminInitial = payload.sub.charAt(0).toUpperCase();
     }
+
+    this.initializeSettingsForms();
 
     this.loadMembers();
     this.loadCoaches();
@@ -861,5 +882,71 @@ export class AdminComponent implements OnInit {
   getMemberNameById(memberId: number): string {
     const member = this.members.find(m => m.id === memberId);
     return member ? (member.firstName + ' ' + member.lastName) : 'Membre #' + memberId;
+  }
+
+  private initializeSettingsForms(): void {
+    const payload = this.auth.getPayload();
+    const storedDisplayName = localStorage.getItem('adminProfile.displayName');
+    const storedEmail = localStorage.getItem('adminProfile.email');
+    const storedPhone = localStorage.getItem('adminProfile.phone');
+
+    this.profileForm.displayName = storedDisplayName || this.adminName || payload?.sub || '';
+    this.profileForm.email = storedEmail || payload?.email || '';
+    this.profileForm.phone = storedPhone || '';
+  }
+
+  saveProfileSettings(): void {
+    this.profileError = '';
+    this.profileSuccess = '';
+
+    if (!this.profileForm.displayName.trim()) {
+      this.profileError = 'Le nom d\'affichage est obligatoire.';
+      return;
+    }
+
+    this.profileLoading = true;
+
+    localStorage.setItem('adminProfile.displayName', this.profileForm.displayName.trim());
+    localStorage.setItem('adminProfile.email', this.profileForm.email.trim());
+    localStorage.setItem('adminProfile.phone', this.profileForm.phone.trim());
+
+    this.adminName = this.profileForm.displayName.trim();
+    this.adminInitial = this.adminName.charAt(0).toUpperCase();
+
+    this.profileLoading = false;
+    this.profileSuccess = 'Profil mis à jour avec succès.';
+  }
+
+  submitPasswordChange(): void {
+    this.passwordError = '';
+    this.passwordSuccess = '';
+
+    if (!this.passwordForm.currentPassword || !this.passwordForm.newPassword || !this.passwordForm.confirmPassword) {
+      this.passwordError = 'Veuillez remplir tous les champs du mot de passe.';
+      return;
+    }
+
+    if (this.passwordForm.newPassword.length < 6) {
+      this.passwordError = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
+      return;
+    }
+
+    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+      this.passwordError = 'La confirmation ne correspond pas au nouveau mot de passe.';
+      return;
+    }
+
+    this.passwordLoading = true;
+    this.auth.changePassword(this.passwordForm.currentPassword, this.passwordForm.newPassword).subscribe({
+      next: () => {
+        this.passwordLoading = false;
+        this.passwordSuccess = 'Mot de passe modifié avec succès.';
+        this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
+      },
+      error: (err) => {
+        this.passwordLoading = false;
+        this.passwordError = err?.error?.message || 'Erreur lors du changement du mot de passe.';
+      }
+    });
   }
 }
