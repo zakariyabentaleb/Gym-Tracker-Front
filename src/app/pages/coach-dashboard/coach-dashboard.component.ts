@@ -216,7 +216,7 @@ export class CoachDashboardComponent implements OnInit {
   }
 
   getCourseName(courseId: number): string {
-    return this.courses.find(c => c.id === courseId)?.name || 'Cours #' + courseId;
+    return this.courses.find(c => c.id === courseId)?.name || 'Cours indisponible';
   }
 
   formatDate(iso: string): string {
