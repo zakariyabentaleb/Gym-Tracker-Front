@@ -1,0 +1,177 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🎯</div>
+      <div>
+        <div class="brand-name">Fit<span>Zone</span></div>
+        <div class="brand-sub">Espace Coach</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item" [class.active]="activePage === 'dashboard'" (click)="goTo('dashboard')">🏠 Dashboard</div>
+      <div class="nav-item" [class.active]="activePage === 'seances'" (click)="goTo('seances')">📅 Mes séances</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Compte</div>
+      <div class="nav-item" [class.active]="activePage === 'profil'" (click)="goTo('profil')">👤 Mon profil</div>
+      <div class="nav-item" [class.active]="activePage === 'securite'" (click)="goTo('securite')">🔒 Sécurité</div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-block">
+        <div class="user-av">{{ coachInitial }}</div>
+        <div class="user-name">{{ coachName }}</div>
+      </div>
+      <button class="btn-logout" (click)="logout()">Déconnexion</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">{{ pageTitle }}</div>
+        <div class="breadcrumb">Espace Coach → <span>{{ pageBreadcrumb }}</span></div>
+      </div>
+      <div class="tb-date">📆 {{ todayDate }}</div>
+    </div>
+
+    <div class="content">
+      @if (loading) {
+        <div class="card">Chargement...</div>
+      } @else {
+        @if (sessionMsg) {
+          <div class="alert ok" style="margin-bottom:14px">{{ sessionMsg }}</div>
+        }
+
+        <div class="page" [class.active]="activePage === 'dashboard'">
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-num">{{ upcomingSchedules.length }}</div><div class="kpi-label">Séances à venir</div></div>
+            <div class="kpi"><div class="kpi-num">{{ pastSchedules.length }}</div><div class="kpi-label">Séances passées</div></div>
+            <div class="kpi"><div class="kpi-num">{{ confirmedTodayCount }}</div><div class="kpi-label">Confirmées aujourd'hui</div></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Prochaines séances</div>
+            <div class="list">
+              @for (s of upcomingSchedules.slice(0, 6); track s.id) {
+                <div class="row">
+                  <div>
+                    <div class="row-title">{{ getCourseName(s.courseId) }}</div>
+                    <div class="row-meta">{{ formatDate(s.startTime) }} · {{ formatTime(s.startTime) }} - {{ formatTime(s.endTime) }} · {{ s.room || 'Salle non définie' }}</div>
+                  </div>
+                  <button class="btn" [disabled]="confirmingId === s.id || isConfirmed(s.id)" (click)="confirmSchedule(s)">
+                    {{ isConfirmed(s.id) ? 'Confirmée' : (confirmingId === s.id ? 'Confirmation...' : 'Confirmer') }}
+                  </button>
+                </div>
+              }
+              @if (upcomingSchedules.length === 0) {
+                <div class="empty">Aucune séance à venir.</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="page" [class.active]="activePage === 'seances'">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title">Mes séances à venir</div>
+              <div class="list">
+                @for (s of upcomingSchedules; track s.id) {
+                  <div class="row">
+                    <div>
+                      <div class="row-title">{{ getCourseName(s.courseId) }}</div>
+                      <div class="row-meta">{{ formatDate(s.startTime) }} · {{ formatTime(s.startTime) }} - {{ formatTime(s.endTime) }} · {{ s.room || 'Salle non définie' }}</div>
+                    </div>
+                    <button class="btn" [disabled]="confirmingId === s.id || isConfirmed(s.id)" (click)="confirmSchedule(s)">
+                      {{ isConfirmed(s.id) ? 'Confirmée' : (confirmingId === s.id ? 'Confirmation...' : 'Confirmer') }}
+                    </button>
+                  </div>
+                }
+                @if (upcomingSchedules.length === 0) {
+                  <div class="empty">Aucune séance à venir.</div>
+                }
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Historique séances</div>
+              <div class="list">
+                @for (s of pastSchedules.slice(-8).reverse(); track s.id) {
+                  <div class="row">
+                    <div>
+                      <div class="row-title">{{ getCourseName(s.courseId) }}</div>
+                      <div class="row-meta">{{ formatDate(s.startTime) }} · {{ formatTime(s.startTime) }} - {{ formatTime(s.endTime) }}</div>
+                    </div>
+                    <span class="pill">Terminée</span>
+                  </div>
+                }
+                @if (pastSchedules.length === 0) {
+                  <div class="empty">Aucune séance passée.</div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page" [class.active]="activePage === 'profil'">
+          <div class="card">
+            <div class="card-title">Mon profil coach</div>
+            @if (profileError) {
+              <div class="alert err">{{ profileError }}</div>
+            }
+            @if (profileSuccess) {
+              <div class="alert ok">{{ profileSuccess }}</div>
+            }
+            <form (ngSubmit)="saveProfile()" class="form">
+              <label>Nom d'affichage</label>
+              <input class="input" name="displayName" [(ngModel)]="profileForm.displayName" required>
+
+              <label>Téléphone</label>
+              <input class="input" name="phone" [(ngModel)]="profileForm.phone" placeholder="+212 6XX XXX XXX">
+
+              <label>Bio</label>
+              <textarea class="input" name="bio" [(ngModel)]="profileForm.bio"></textarea>
+
+              <label>Certifications</label>
+              <input class="input" name="certifications" [(ngModel)]="profileForm.certifications" placeholder="CrossFit L2, NASM">
+
+              <button class="btn" type="submit" [disabled]="profileLoading">{{ profileLoading ? 'Enregistrement...' : 'Enregistrer profil' }}</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="page" [class.active]="activePage === 'securite'">
+          <div class="card">
+            <div class="card-title">Sécurité</div>
+            @if (passwordError) {
+              <div class="alert err">{{ passwordError }}</div>
+            }
+            @if (passwordSuccess) {
+              <div class="alert ok">{{ passwordSuccess }}</div>
+            }
+            <form (ngSubmit)="changePassword()" class="form grid-pass">
+              <div>
+                <label>Mot de passe actuel</label>
+                <input class="input" type="password" name="currentPassword" [(ngModel)]="passwordForm.currentPassword" required>
+              </div>
+              <div>
+                <label>Nouveau mot de passe</label>
+                <input class="input" type="password" name="newPassword" [(ngModel)]="passwordForm.newPassword" required>
+              </div>
+              <div>
+                <label>Confirmer nouveau mot de passe</label>
+                <input class="input" type="password" name="confirmPassword" [(ngModel)]="passwordForm.confirmPassword" required>
+              </div>
+              <div>
+                <button class="btn" type="submit" [disabled]="passwordLoading">{{ passwordLoading ? 'Mise à jour...' : 'Mettre a jour mot de passe' }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
