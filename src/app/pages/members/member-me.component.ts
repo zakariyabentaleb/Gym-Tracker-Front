@@ -28,6 +28,6 @@ export class MemberMeComponent {
   constructor(private auth: AuthService) {}
 
   get roles(): string {
-    return this.auth.getUserRoles().join(', ');
+    return this.auth.getUserRoleLabels().join(', ');
   }
 }
