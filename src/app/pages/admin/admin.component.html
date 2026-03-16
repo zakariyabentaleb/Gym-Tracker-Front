@@ -604,29 +604,55 @@
       <div class="page" [class.active]="activePage === 'parametres'">
         <div class="grid-2">
           <div class="card">
-            <div class="card-head"><div><div class="card-title">Informations de la salle</div></div></div>
-            <div style="display:flex;flex-direction:column;gap:12px">
-              <div class="form-group"><label class="form-label">Nom de la salle</label><input class="form-input" value="FitZone Pro"></div>
-              <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" value="Av. Mohammed V, Kénitra 14000"></div>
-              <div class="form-row">
-                <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" value="+212 537 XX XX XX"></div>
-                <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="contact&#64;fitzone.ma"></div>
+            <div class="card-head"><div><div class="card-title">Profil administrateur</div><div class="card-meta">Mettre à jour vos informations</div></div></div>
+            <form (ngSubmit)="saveProfileSettings()" style="display:flex;flex-direction:column;gap:12px">
+              @if (profileError) {
+                <div class="alert alert-err"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ profileError }}</span></div>
+              }
+              @if (profileSuccess) {
+                <div class="alert alert-ok"><span class="alert-icon">✅</span><span class="alert-txt">{{ profileSuccess }}</span></div>
+              }
+              <div class="form-group">
+                <label class="form-label">Nom d'affichage</label>
+                <input class="form-input" name="profileDisplayName" [(ngModel)]="profileForm.displayName" required>
               </div>
               <div class="form-row">
-                <div class="form-group"><label class="form-label">Ouverture</label><input class="form-input" value="06:00"></div>
-                <div class="form-group"><label class="form-label">Fermeture</label><input class="form-input" value="00:00"></div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" type="email" name="profileEmail" [(ngModel)]="profileForm.email" placeholder="admin@fitzone.ma">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Téléphone</label>
+                  <input class="form-input" name="profilePhone" [(ngModel)]="profileForm.phone" placeholder="+212 6XX XXX XXX">
+                </div>
               </div>
-              <button class="btn-submit">💾 Sauvegarder les modifications</button>
-            </div>
+              <button class="btn-submit" type="submit" [disabled]="profileLoading">{{ profileLoading ? 'Enregistrement...' : '💾 Mettre à jour le profil' }}</button>
+            </form>
           </div>
+
           <div class="card">
-            <div class="card-head"><div><div class="card-title">Paramètres notifications</div></div></div>
-            <div style="display:flex;flex-direction:column;gap:14px">
-              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Rappels abonnement</div><div style="font-size:11px;color:var(--muted)">Envoyer 7 jours avant expiration</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Alertes maintenance</div><div style="font-size:11px;color:var(--muted)">Notifications pannes équipements</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Rapports hebdomadaires</div><div style="font-size:11px;color:var(--muted)">Bilan automatique chaque lundi</div></div><div class="toggle on"><div class="toggle-knob"></div></div></div>
-              <div class="toggle-row"><div><div style="font-size:13px;font-weight:600">Alertes affluence max</div><div style="font-size:11px;color:var(--muted)">Quand la salle est à 90% de capacité</div></div><div class="toggle"><div class="toggle-knob"></div></div></div>
-            </div>
+            <div class="card-head"><div><div class="card-title">Sécurité</div><div class="card-meta">Changer votre mot de passe</div></div></div>
+            <form (ngSubmit)="submitPasswordChange()" style="display:flex;flex-direction:column;gap:12px">
+              @if (passwordError) {
+                <div class="alert alert-err"><span class="alert-icon">⚠️</span><span class="alert-txt">{{ passwordError }}</span></div>
+              }
+              @if (passwordSuccess) {
+                <div class="alert alert-ok"><span class="alert-icon">✅</span><span class="alert-txt">{{ passwordSuccess }}</span></div>
+              }
+              <div class="form-group">
+                <label class="form-label">Mot de passe actuel</label>
+                <input class="form-input" type="password" name="currentPassword" [(ngModel)]="passwordForm.currentPassword" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nouveau mot de passe</label>
+                <input class="form-input" type="password" name="newPassword" [(ngModel)]="passwordForm.newPassword" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                <input class="form-input" type="password" name="confirmPassword" [(ngModel)]="passwordForm.confirmPassword" required>
+              </div>
+              <button class="btn-submit" type="submit" [disabled]="passwordLoading">{{ passwordLoading ? 'Mise à jour...' : '🔒 Mettre à jour le mot de passe' }}</button>
+            </form>
           </div>
         </div>
       </div>
