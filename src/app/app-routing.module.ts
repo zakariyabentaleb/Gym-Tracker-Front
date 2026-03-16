@@ -14,6 +14,7 @@ import { CourseDetailComponent } from './pages/course-detail/course-detail.compo
 import { MesInscriptionsComponent } from './pages/mes-inscriptions/mes-inscriptions.component';
 import { PlansComponent } from './pages/plans/plans.component';
 import { MonAbonnementComponent } from './pages/mon-abonnement/mon-abonnement.component';
+import { CoachDashboardComponent } from './pages/coach-dashboard/coach-dashboard.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -29,6 +30,12 @@ const routes: Routes = [
     component: AdminComponent,
     canActivate: [RoleGuard],
     data: { roles: ['ROLE_ADMIN'] }
+  },
+  {
+    path: 'coach',
+    component: CoachDashboardComponent,
+    canActivate: [RoleGuard],
+    data: { roles: ['ROLE_COACH'] }
   },
   {
     path: 'members',
