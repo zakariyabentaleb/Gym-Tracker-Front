@@ -3,7 +3,7 @@
     <div class="details-header">
       <div>
         <h1 class="page-title">{{ member.firstName }} {{ member.lastName }}</h1>
-        <p class="page-subtitle">Member #{{ member.id }}</p>
+        <p class="page-subtitle">Member profile</p>
       </div>
       <div class="header-actions">
         <a [routerLink]="['/members', member.id, 'edit']" class="btn btn-primary">✏️ Edit</a>
@@ -39,10 +39,6 @@
       <div class="card detail-card">
         <h3 class="detail-label">📋 Account</h3>
         <div class="detail-rows">
-          <div class="detail-row">
-            <span class="detail-key">User ID</span>
-            <span class="detail-value">{{ member.userId }}</span>
-          </div>
           <div class="detail-row">
             <span class="detail-key">Status</span>
             <span class="pill" [class.pill-ok]="member.active" [class.pill-warn]="!member.active">
