@@ -220,7 +220,7 @@
                   <div class="sched-time">J+{{ daysUntil(s.endDate) }}</div>
                   <div class="sched-info">
                     <div class="sched-name">{{ getPlanNameById(s.planId) }}</div>
-                    <div class="sched-meta">Membre #{{ s.memberId }} · Fin: {{ formatSubDate(s.endDate) }}</div>
+                    <div class="sched-meta">{{ getMemberNameById(s.memberId) }} · Fin: {{ formatSubDate(s.endDate) }}</div>
                   </div>
                   <div class="sched-spots"><span class="pill pill-orange">Expire bientôt</span></div>
                 </div>
@@ -379,7 +379,7 @@
                       <td>{{ getCoachName(s.coachId) }}</td>
                       <td>{{ s.room || '—' }}</td>
                       <td>{{ s.capacity || '—' }}</td>
-                      <td><span class="pill" [class.pill-green]="s.active && !isScheduleExpired(s.endTime)" [class.pill-red]="!s.active && !isScheduleExpired(s.endTime)" [class.pill-orange]="isScheduleExpired(s.endTime)">{{ getScheduleStatus(s) }}</span></td>
+                      <td><span class="pill" [class.pill-green]="s.active && !isScheduleExpired(s.endTime)" [class.pill-red]="!s.active || isScheduleExpired(s.endTime)">{{ getScheduleStatus(s) }}</span></td>
                       <td style="display:flex;gap:10px">
                         <span style="cursor:pointer;color:var(--accent);font-size:13px" (click)="editSchedule(s)">✏️</span>
                         <span style="cursor:pointer;color:var(--red);font-size:13px" (click)="deleteSchedule(s)">🗑️</span>
@@ -537,11 +537,10 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>ID</th><th>Membre</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Référence</th><th>Date</th></tr></thead>
+                <thead><tr><th>Membre</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Référence</th><th>Date</th></tr></thead>
                 <tbody>
                   @for (p of allPayments; track p.id) {
                     <tr>
-                      <td>#{{ p.id }}</td>
                       <td>{{ getMemberNameById(p.memberId) }}</td>
                       <td style="font-weight:600;color:var(--green)">{{ formatPrice(p.amountCents) }} MAD</td>
                       <td>
@@ -558,7 +557,7 @@
                       <td style="font-size:12px">{{ formatPaymentDate(p.paymentDate) }}</td>
                     </tr>
                   } @empty {
-                    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucun paiement enregistré</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Aucun paiement enregistré</td></tr>
                   }
                 </tbody>
               </table>
@@ -574,11 +573,10 @@
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>ID</th><th>Membre</th><th>Plan</th><th>Début</th><th>Fin</th><th>Statut</th><th>Renouvellement auto</th></tr></thead>
+                <thead><tr><th>Membre</th><th>Plan</th><th>Début</th><th>Fin</th><th>Statut</th><th>Renouvellement auto</th></tr></thead>
                 <tbody>
                   @for (s of allSubscriptions; track s.id) {
                     <tr>
-                      <td>#{{ s.id }}</td>
                       <td>{{ getMemberNameById(s.memberId) }}</td>
                       <td>{{ getPlanNameById(s.planId) }}</td>
                       <td style="font-size:12px">{{ formatSubDate(s.startDate) }}</td>
@@ -591,7 +589,7 @@
                       <td style="text-align:center">{{ s.autoRenew ? '✅' : '—' }}</td>
                     </tr>
                   } @empty {
-                    <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Aucun abonnement enregistré</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Aucun abonnement enregistré</td></tr>
                   }
                 </tbody>
               </table>
