@@ -72,7 +72,7 @@
                   @if (item.course) {
                     <a [routerLink]="['/programmes', item.course.id]">{{ item.course.name }}</a>
                   } @else {
-                    Cours #{{ item.schedule?.courseId || '?' }}
+                    Cours indisponible
                   }
                 </div>
                 @if (item.schedule) {
