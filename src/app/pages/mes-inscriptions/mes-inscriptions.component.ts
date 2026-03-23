@@ -10,6 +10,7 @@ import { CoachService } from '../../core/services/coach.service';
 import { BookingResponse } from '../../models/booking.model';
 import { CourseResponse, CourseScheduleResponse } from '../../models/course.model';
 import { CoachResponse } from '../../models/coach.model';
+import { environment } from '../../../environments/environment';
 
 interface EnrichedBooking {
   booking: BookingResponse;
@@ -26,6 +27,10 @@ interface EnrichedBooking {
   styleUrls: ['./mes-inscriptions.component.css']
 })
 export class MesInscriptionsComponent implements OnInit {
+  private readonly apiHost = environment.apiUrl.startsWith('http')
+    ? environment.apiUrl.replace(/\/api$/, '')
+    : window.location.origin;
+
   loading = true;
   enriched: EnrichedBooking[] = [];
   cancellingId: number | null = null;
@@ -136,7 +141,7 @@ export class MesInscriptionsComponent implements OnInit {
   getPhotoUrl(url: string | null | undefined): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return 'http://localhost:8080' + url;
+    return `${this.apiHost}${url}`;
   }
 
   getStatusLabel(status: string): string {
