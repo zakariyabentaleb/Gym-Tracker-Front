@@ -18,6 +18,7 @@ import { PaymentService } from '../../core/services/payment.service';
 import { SubscriptionResponse } from '../../models/subscription.model';
 import { PaymentResponse } from '../../models/payment.model';
 import { switchMap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin',
@@ -27,6 +28,10 @@ import { switchMap } from 'rxjs';
   styleUrls: ['./admin.component.css']
 })
 export class AdminComponent implements OnInit {
+  private readonly apiHost = environment.apiUrl.startsWith('http')
+    ? environment.apiUrl.replace(/\/api$/, '')
+    : window.location.origin;
+
   /* ── sidebar ── */
   searchQuery = '';
   activePage = 'dashboard';
@@ -510,7 +515,7 @@ export class AdminComponent implements OnInit {
     this.coursePhotoUploading = true;
     const fd = new FormData();
     fd.append('file', file);
-    this.http.post<{ url: string }>('http://localhost:8080/api/upload', fd).subscribe({
+    this.http.post<{ url: string }>(`${environment.apiUrl}/upload`, fd).subscribe({
       next: res => {
         this.newCourse.photoUrl = res.url;
         this.coursePhotoUploading = false;
@@ -525,7 +530,7 @@ export class AdminComponent implements OnInit {
   getCoursePhotoFullUrl(url: string): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return 'http://localhost:8080' + url;
+    return `${this.apiHost}${url}`;
   }
 
   submitCourse(): void {
