@@ -9,6 +9,7 @@ import { CourseScheduleService } from '../../core/services/course-schedule.servi
 import { CourseResponse, CourseScheduleResponse } from '../../models/course.model';
 import { CoachService } from '../../core/services/coach.service';
 import { CoachResponse } from '../../models/coach.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-programmes',
@@ -18,6 +19,10 @@ import { CoachResponse } from '../../models/coach.model';
   styleUrl: './programmes.component.css'
 })
 export class ProgrammesComponent implements OnInit {
+  private readonly apiHost = environment.apiUrl.startsWith('http')
+    ? environment.apiUrl.replace(/\/api$/, '')
+    : window.location.origin;
+
   activeTab: 'courses' | 'schedules' = 'courses';
   loading = true;
 
@@ -192,7 +197,7 @@ export class ProgrammesComponent implements OnInit {
   getPhotoUrl(url: string | null | undefined): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return 'http://localhost:8080' + url;
+    return `${this.apiHost}${url}`;
   }
 
   get activeCourseCount(): number {
