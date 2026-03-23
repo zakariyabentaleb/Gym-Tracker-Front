@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import { CourseResponse, CourseScheduleResponse } from '../../models/course.model';
 import { CoachResponse } from '../../models/coach.model';
 import { BookingResponse } from '../../models/booking.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-course-detail',
@@ -20,6 +21,10 @@ import { BookingResponse } from '../../models/booking.model';
   styleUrl: './course-detail.component.css'
 })
 export class CourseDetailComponent implements OnInit {
+  private readonly apiHost = environment.apiUrl.startsWith('http')
+    ? environment.apiUrl.replace(/\/api$/, '')
+    : window.location.origin;
+
   course: CourseResponse | null = null;
   schedules: CourseScheduleResponse[] = [];
   coaches: CoachResponse[] = [];
@@ -168,7 +173,7 @@ export class CourseDetailComponent implements OnInit {
   getPhotoUrl(url: string | null | undefined): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return 'http://localhost:8080' + url;
+    return `${this.apiHost}${url}`;
   }
 
   getCourseIcon(name: string): string {
