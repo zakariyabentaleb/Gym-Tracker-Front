@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourseService } from '../../core/services/course.service';
 import { CourseResponse } from '../../models/course.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +16,9 @@ import { CourseResponse } from '../../models/course.model';
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private observer?: IntersectionObserver;
+  private readonly apiHost = environment.apiUrl.startsWith('http')
+    ? environment.apiUrl.replace(/\/api$/, '')
+    : window.location.origin;
   courses: CourseResponse[] = [];
 
   constructor(
@@ -67,7 +71,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   getPhotoUrl(url: string | null | undefined): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return 'http://localhost:8080' + url;
+    return `${this.apiHost}${url}`;
   }
 
   getCourseIcon(name: string): string {
