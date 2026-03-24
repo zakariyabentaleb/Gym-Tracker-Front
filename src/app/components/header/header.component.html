@@ -21,7 +21,6 @@
   <div class="nav-actions">
     @if (!auth.isLoggedIn()) {
       <a class="btn btn-outline" routerLink="/login">Connexion</a>
-      <a class="btn btn-primary" routerLink="/register">S'inscrire</a>
     } @else {
       <span class="user-role-badge">{{ auth.getPrimaryRoleLabel() }}</span>
       @if (!auth.hasRole('ROLE_COACH')) {
