@@ -100,27 +100,14 @@
           <div class="kpi">
             <div class="kpi-top">
               <div class="kpi-icon ico-orange">👥</div>
-              <span class="kpi-delta up">↑ +8%</span>
+              
             </div>
             <div class="kpi-val">{{ totalMembers }}</div>
             <div class="kpi-lbl">Membres actifs</div>
-            <div class="kpi-sub">↑ 27 nouveaux ce mois</div>
           </div>
           <div class="kpi">
             <div class="kpi-top">
               <div class="kpi-icon ico-green">💰</div>
-              <span
-                class="kpi-delta"
-                [class.up]="monthRevenueDeltaPct !== null && monthRevenueDeltaPct >= 0"
-                [class.down]="monthRevenueDeltaPct !== null && monthRevenueDeltaPct < 0"
-                [class.neutral]="monthRevenueDeltaPct === null"
-              >
-                @if (monthRevenueDeltaPct !== null) {
-                  {{ monthRevenueDeltaPct! >= 0 ? '↑ +' : '↓ ' }}{{ monthRevenueDeltaPct! | number:'1.0-1' }}%
-                } @else {
-                  → N/A
-                }
-              </span>
             </div>
             <div class="kpi-val">{{ formatPrice(monthRevenueCents) }}</div>
             <div class="kpi-lbl">Revenus du mois (MAD)</div>
@@ -262,10 +249,8 @@
       <!-- ════════════════════ PAGE: MEMBRES ════════════════════ -->
       <div class="page" [class.active]="activePage === 'membres'">
         <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">👥</div><span class="kpi-delta up">↑ +8%</span></div><div class="kpi-val">{{ totalMembers }}</div><div class="kpi-lbl">Total membres</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div><span class="kpi-delta up">↑ +5</span></div><div class="kpi-val">{{ activeMembers }}</div><div class="kpi-lbl">Actifs</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-red">⏰</div><span class="kpi-delta down">↑ +3</span></div><div class="kpi-val">24</div><div class="kpi-lbl">Expirant bientôt</div></div>
-          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-purple">🆕</div><span class="kpi-delta up">↑ +27</span></div><div class="kpi-val">27</div><div class="kpi-lbl">Nouveaux ce mois</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-orange">👥</div></div><div class="kpi-val">{{ totalMembers }}</div><div class="kpi-lbl">Total membres</div></div>
+          <div class="kpi"><div class="kpi-top"><div class="kpi-icon ico-green">✅</div></div><div class="kpi-val">{{ activeMembers }}</div><div class="kpi-lbl">Actifs</div></div>
         </div>
 
         <div class="card">
